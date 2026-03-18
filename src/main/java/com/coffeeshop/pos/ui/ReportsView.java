@@ -1,5 +1,6 @@
 package com.coffeeshop.pos.ui;
 
+import com.coffeeshop.pos.config.SessionManager;
 import com.coffeeshop.pos.model.User;
 import com.coffeeshop.pos.service.OrderService;
 import javafx.geometry.Insets;
@@ -17,7 +18,6 @@ import javafx.stage.Stage;
 public class ReportsView {
 
     private final Stage stage;
-    private final User user;
     private final OrderService orderService;
 
     private final TextField dateField;
@@ -26,9 +26,8 @@ public class ReportsView {
     private final TextArea resultArea;
     private final Label statusLabel;
 
-    public ReportsView(Stage stage, User user) {
+    public ReportsView(Stage stage) {
         this.stage = stage;
-        this.user = user;
         this.orderService = new OrderService();
 
         this.dateField = new TextField();
@@ -39,6 +38,13 @@ public class ReportsView {
     }
 
     public Scene createScene() {
+        User user = SessionManager.getCurrentUser();
+
+        if (user == null) {
+            LoginView loginView = new LoginView(stage);
+            return loginView.createScene();
+        }
+
         Label titleLabel = new Label("Reports");
         Label userLabel = new Label("User: " + user.getUsername());
 
@@ -170,7 +176,7 @@ public class ReportsView {
     }
 
     private void goBackToDashboard() {
-        DashboardView dashboardView = new DashboardView(stage, user);
+        DashboardView dashboardView = new DashboardView(stage);
         stage.setScene(dashboardView.createScene());
         stage.setTitle("Coffee POS - Dashboard");
     }
