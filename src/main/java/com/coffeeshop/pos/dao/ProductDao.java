@@ -84,4 +84,86 @@ public class ProductDao {
             statement.executeUpdate();
         }
     }
+    public boolean insertProduct(Product product) {
+        String sql = """
+            INSERT INTO products (name, category_id, price, stock_qty, is_active)
+            VALUES (?, ?, ?, ?, ?)
+            """;
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, product.getName());
+            statement.setInt(2, product.getCategoryId());
+            statement.setDouble(3, product.getPrice());
+            statement.setInt(4, product.getStockQty());
+            statement.setInt(5, product.isActive() ? 1 : 0);
+
+            return statement.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.out.println("Failed to insert product: " + e.getMessage());
+            return false;
+        }
+    }
+    public boolean updateProductPrice(int productId, double newPrice) {
+        String sql = """
+            UPDATE products
+            SET price = ?
+            WHERE id = ?
+            """;
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setDouble(1, newPrice);
+            statement.setInt(2, productId);
+
+            return statement.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.out.println("Failed to update product price: " + e.getMessage());
+            return false;
+        }
+    }
+    public boolean updateProductStock(int productId, int newStockQty) {
+        String sql = """
+            UPDATE products
+            SET stock_qty = ?
+            WHERE id = ?
+            """;
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, newStockQty);
+            statement.setInt(2, productId);
+
+            return statement.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.out.println("Failed to update product stock: " + e.getMessage());
+            return false;
+        }
+    }
+    public boolean updateProductActiveStatus(int productId, boolean active) {
+        String sql = """
+            UPDATE products
+            SET is_active = ?
+            WHERE id = ?
+            """;
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, active ? 1 : 0);
+            statement.setInt(2, productId);
+
+            return statement.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.out.println("Failed to update product active status: " + e.getMessage());
+            return false;
+        }
+    }
 }

@@ -61,7 +61,12 @@ public class ConsolePosApp {
                 case 9 -> viewCustomDateSalesReport();
                 case 10 -> viewDateRangeSalesReport();
                 case 11 -> orderService.printTopSellingProductsReport();
-                case 12 -> {
+                case 12 -> addNewProduct();
+                case 13 -> updateProductPrice();
+                case 14 -> updateProductStock();
+                case 15 -> activateProduct();
+                case 16 -> deactivateProduct();
+                case 17 -> {
                     posService.clearCart();
                     System.out.println("Order cancelled.");
                     running = false;
@@ -106,7 +111,12 @@ public class ConsolePosApp {
             9. View sales report by date
             10. View sales report by date range
             11. View top-selling products report
-            12. Cancel order
+            12. Add new product
+            13. Update product price
+            14. Update product stock
+            15. Activate product
+            16. Deactivate product
+            17. Cancel order
             """);
     }
 
@@ -274,5 +284,89 @@ public class ConsolePosApp {
         }
 
         orderService.printSalesReportBetweenDates(startDate, endDate);
+    }
+    private void addNewProduct() {
+        System.out.print("Enter product name: ");
+        scanner.nextLine();
+        String name = scanner.nextLine();
+
+        System.out.print("Enter category id: ");
+        int categoryId = scanner.nextInt();
+
+        System.out.print("Enter price: ");
+        double price = scanner.nextDouble();
+
+        System.out.print("Enter stock quantity: ");
+        int stockQty = scanner.nextInt();
+
+        boolean added = productService.addProduct(name, categoryId, price, stockQty);
+
+        if (added) {
+            System.out.println("Product added successfully.");
+        } else {
+            System.out.println("Failed to add product.");
+        }
+    }
+    private void updateProductPrice() {
+        printAvailableProducts();
+
+        System.out.print("Enter product id: ");
+        int productId = scanner.nextInt();
+
+        System.out.print("Enter new price: ");
+        double newPrice = scanner.nextDouble();
+
+        boolean updated = productService.updateProductPrice(productId, newPrice);
+
+        if (updated) {
+            System.out.println("Product price updated successfully.");
+        } else {
+            System.out.println("Failed to update product price.");
+        }
+    }
+    private void updateProductStock() {
+        printAvailableProducts();
+
+        System.out.print("Enter product id: ");
+        int productId = scanner.nextInt();
+
+        System.out.print("Enter new stock quantity: ");
+        int newStockQty = scanner.nextInt();
+
+        boolean updated = productService.updateProductStock(productId, newStockQty);
+
+        if (updated) {
+            System.out.println("Product stock updated successfully.");
+        } else {
+            System.out.println("Failed to update product stock.");
+        }
+    }
+    private void activateProduct() {
+        printAvailableProducts();
+
+        System.out.print("Enter product id to activate: ");
+        int productId = scanner.nextInt();
+
+        boolean updated = productService.activateProduct(productId);
+
+        if (updated) {
+            System.out.println("Product activated successfully.");
+        } else {
+            System.out.println("Failed to activate product.");
+        }
+    }
+    private void deactivateProduct() {
+        printAvailableProducts();
+
+        System.out.print("Enter product id to deactivate: ");
+        int productId = scanner.nextInt();
+
+        boolean updated = productService.deactivateProduct(productId);
+
+        if (updated) {
+            System.out.println("Product deactivated successfully.");
+        } else {
+            System.out.println("Failed to deactivate product.");
+        }
     }
 }
