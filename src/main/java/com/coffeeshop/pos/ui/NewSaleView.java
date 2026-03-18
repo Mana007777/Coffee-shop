@@ -1,5 +1,6 @@
 package com.coffeeshop.pos.ui;
 
+import com.coffeeshop.pos.config.SessionManager;
 import com.coffeeshop.pos.model.CartItem;
 import com.coffeeshop.pos.model.Product;
 import com.coffeeshop.pos.model.User;
@@ -18,8 +19,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import com.coffeeshop.pos.config.SessionManager;
-import com.coffeeshop.pos.model.User;
+
 import java.util.List;
 
 public class NewSaleView {
@@ -57,10 +57,12 @@ public class NewSaleView {
             LoginView loginView = new LoginView(stage);
             return loginView.createScene();
         }
+
         Label titleLabel = new Label("New Sale");
         Label cashierLabel = new Label("Cashier: " + user.getUsername());
 
         loadProducts();
+        refreshCart();
 
         quantityField.setPromptText("Quantity");
         amountPaidField.setPromptText("Amount Paid");
@@ -249,6 +251,13 @@ public class NewSaleView {
     }
 
     private void handleCheckout() {
+        User user = SessionManager.getCurrentUser();
+
+        if (user == null) {
+            statusLabel.setText("No active session. Please log in again.");
+            return;
+        }
+
         if (posService.isCartEmpty()) {
             statusLabel.setText("Cart is empty. Cannot checkout.");
             return;
@@ -305,7 +314,7 @@ public class NewSaleView {
     }
 
     private void goBackToDashboard() {
-        DashboardView dashboardView = new DashboardView(stage, user);
+        DashboardView dashboardView = new DashboardView(stage);
         stage.setScene(dashboardView.createScene());
         stage.setTitle("Coffee POS - Dashboard");
     }
