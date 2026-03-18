@@ -11,6 +11,7 @@ import java.util.List;
 import com.coffeeshop.pos.config.DatabaseConnection;
 import java.util.ArrayList;
 import java.util.List;
+import com.coffeeshop.pos.model.OrderItem;
 
 public class OrderDao {
 
@@ -114,5 +115,53 @@ public class OrderDao {
         order.setCreatedAt(resultSet.getString("created_at"));
         order.setCashierId(resultSet.getInt("cashier_id"));
         return order;
+    }
+    public List<OrderItem> getOrderItemsByOrderId(int orderId) {
+        List<OrderItem> items = new ArrayList<>();
+
+        String sql = """
+            SELECT oi.id,
+                   oi.order_id,
+                   oi.product_id,
+                   p.name AS product_name,
+                   oi.quantity,
+                   oi.unit_price,
+                   oi.subtotal,
+                   oi.note
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            WHERE oi.order_id = ?
+            ORDER BY oi.id
+            """;
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, orderId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    OrderItem item = mapResultSetToOrderItem(resultSet);
+                    items.add(item);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Failed to fetch order items: " + e.getMessage());
+        }
+
+        return items;
+    }
+    private OrderItem mapResultSetToOrderItem(ResultSet resultSet) throws SQLException {
+        OrderItem item = new OrderItem();
+        item.setId(resultSet.getInt("id"));
+        item.setOrderId(resultSet.getInt("order_id"));
+        item.setProductId(resultSet.getInt("product_id"));
+        item.setProductName(resultSet.getString("product_name"));
+        item.setQuantity(resultSet.getInt("quantity"));
+        item.setUnitPrice(resultSet.getDouble("unit_price"));
+        item.setSubtotal(resultSet.getDouble("subtotal"));
+        item.setNote(resultSet.getString("note"));
+        return item;
     }
 }

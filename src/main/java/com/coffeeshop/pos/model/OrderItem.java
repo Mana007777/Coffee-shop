@@ -5,6 +5,7 @@ public class OrderItem {
     private int id;
     private int orderId;
     private int productId;
+    private String productName;
     private int quantity;
     private double unitPrice;
     private double subtotal;
@@ -13,9 +14,11 @@ public class OrderItem {
     public OrderItem() {
     }
 
-    public OrderItem(int orderId, int productId, int quantity, double unitPrice, double subtotal, String note) {
+    public OrderItem(int orderId, int productId, String productName, int quantity,
+                     double unitPrice, double subtotal, String note) {
         this.orderId = orderId;
         this.productId = productId;
+        this.productName = productName;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
         this.subtotal = subtotal;
@@ -46,6 +49,14 @@ public class OrderItem {
         this.productId = productId;
     }
 
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
     public int getQuantity() {
         return quantity;
     }
@@ -53,7 +64,6 @@ public class OrderItem {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-
 
     public double getUnitPrice() {
         return unitPrice;
