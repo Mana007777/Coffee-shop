@@ -57,7 +57,10 @@ public class ConsolePosApp {
                 }
                 case 6 -> orderService.printSalesHistory();
                 case 7 -> viewOrderDetails();
-                case 8 -> {
+                case 8 -> viewTodaySalesReport();
+                case 9 -> viewCustomDateSalesReport();
+                case 10 -> viewDateRangeSalesReport();
+                case 11 -> {
                     posService.clearCart();
                     System.out.println("Order cancelled.");
                     running = false;
@@ -99,7 +102,9 @@ public class ConsolePosApp {
             6. View sales history
             7. View order details
             8. View today's sales report
-            9. Cancel order
+            9. View sales report by date
+            10. View sales report by date range
+            11. Cancel order
             """);
     }
 
@@ -224,5 +229,48 @@ public class ConsolePosApp {
     private void viewTodaySalesReport() {
         String today = LocalDate.now().toString();
         orderService.printDailySalesReport(today);
+    }
+    private void viewCustomDateSalesReport() {
+        System.out.print("Enter date (YYYY-MM-DD): ");
+        String date = scanner.next();
+
+        if (!isValidDateFormat(date)) {
+            System.out.println("Invalid date format. Use YYYY-MM-DD.");
+            return;
+        }
+
+        orderService.printDailySalesReport(date);
+    }
+    private boolean isValidDateFormat(String date) {
+        try {
+            java.time.LocalDate.parse(date);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    private void viewDateRangeSalesReport() {
+        System.out.print("Enter start date (YYYY-MM-DD): ");
+        String startDate = scanner.next();
+
+        if (!isValidDateFormat(startDate)) {
+            System.out.println("Invalid start date format. Use YYYY-MM-DD.");
+            return;
+        }
+
+        System.out.print("Enter end date (YYYY-MM-DD): ");
+        String endDate = scanner.next();
+
+        if (!isValidDateFormat(endDate)) {
+            System.out.println("Invalid end date format. Use YYYY-MM-DD.");
+            return;
+        }
+
+        if (java.time.LocalDate.parse(startDate).isAfter(java.time.LocalDate.parse(endDate))) {
+            System.out.println("Start date cannot be after end date.");
+            return;
+        }
+
+        orderService.printSalesReportBetweenDates(startDate, endDate);
     }
 }

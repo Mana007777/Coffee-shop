@@ -217,4 +217,59 @@ public class OrderDao {
 
         return 0.0;
     }
+    public List<Order> getOrdersBetweenDates(String startDate, String endDate) {
+        List<Order> orders = new ArrayList<>();
+
+        String sql = """
+            SELECT id, order_type, total_amount, payment_method,
+                   amount_paid, change_amount, created_at, cashier_id
+            FROM orders
+            WHERE DATE(created_at) BETWEEN ? AND ?
+            ORDER BY id DESC
+            """;
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, startDate);
+            statement.setString(2, endDate);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Order order = mapResultSetToOrder(resultSet);
+                    orders.add(order);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Failed to fetch orders between dates: " + e.getMessage());
+        }
+
+        return orders;
+    }
+    public double getTotalSalesBetweenDates(String startDate, String endDate) {
+        String sql = """
+            SELECT COALESCE(SUM(total_amount), 0)
+            FROM orders
+            WHERE DATE(created_at) BETWEEN ? AND ?
+            """;
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, startDate);
+            statement.setString(2, endDate);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getDouble(1);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Failed to calculate total sales between dates: " + e.getMessage());
+        }
+
+        return 0.0;
+    }
 }

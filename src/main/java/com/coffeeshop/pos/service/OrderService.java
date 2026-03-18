@@ -79,4 +79,20 @@ public class OrderService {
         System.out.println("Number of orders: " + orders.size());
         System.out.println("Total sales: $" + totalSales);
     }
+    public List<Order> getOrdersBetweenDates(String startDate, String endDate) {
+        return orderDao.getOrdersBetweenDates(startDate, endDate);
+    }
+
+    public double getTotalSalesBetweenDates(String startDate, String endDate) {
+        return orderDao.getTotalSalesBetweenDates(startDate, endDate);
+    }
+
+    public void printSalesReportBetweenDates(String startDate, String endDate) {
+        List<Order> orders = getOrdersBetweenDates(startDate, endDate);
+        double totalSales = getTotalSalesBetweenDates(startDate, endDate);
+
+        System.out.println("\nSales Report from " + startDate + " to " + endDate);
+        System.out.println("Number of orders: " + orders.size());
+        System.out.println("Total sales: $" + totalSales);
+    }
 }
