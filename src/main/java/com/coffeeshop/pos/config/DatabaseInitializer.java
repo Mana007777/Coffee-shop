@@ -40,16 +40,16 @@ public class DatabaseInitializer {
 
     private static void createProductsTable() {
         String sql = """
-                CREATE TABLE IF NOT EXISTS products (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    category_id INTEGER,
-                    price REAL NOT NULL,
-                    stock_qty INTEGER NOT NULL DEFAULT 0,
-                    is_active INTEGER NOT NULL DEFAULT 1,
-                    FOREIGN KEY (category_id) REFERENCES categories(id)
-                );
-                """;
+            CREATE TABLE IF NOT EXISTS products (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE,
+                category_id INTEGER,
+                price REAL NOT NULL,
+                stock_qty INTEGER NOT NULL DEFAULT 0,
+                is_active INTEGER NOT NULL DEFAULT 1,
+                FOREIGN KEY (category_id) REFERENCES categories(id)
+            );
+            """;
 
         execute(sql, "products");
     }
