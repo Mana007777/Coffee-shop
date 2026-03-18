@@ -1,5 +1,6 @@
 package com.coffeeshop.pos.ui;
 
+import com.coffeeshop.pos.config.SessionManager;
 import com.coffeeshop.pos.model.Category;
 import com.coffeeshop.pos.model.Product;
 import com.coffeeshop.pos.model.User;
@@ -24,7 +25,6 @@ import java.util.List;
 public class ProductManagementView {
 
     private final Stage stage;
-    private final User user;
     private final ProductService productService;
     private final CategoryService categoryService;
 
@@ -39,9 +39,8 @@ public class ProductManagementView {
 
     private final Label statusLabel;
 
-    public ProductManagementView(Stage stage, User user) {
+    public ProductManagementView(Stage stage) {
         this.stage = stage;
-        this.user = user;
         this.productService = new ProductService();
         this.categoryService = new CategoryService();
 
@@ -57,8 +56,14 @@ public class ProductManagementView {
         this.statusLabel = new Label();
     }
 
-
     public Scene createScene() {
+        User user = SessionManager.getCurrentUser();
+
+        if (user == null) {
+            LoginView loginView = new LoginView(stage);
+            return loginView.createScene();
+        }
+
         if (!"ADMIN".equalsIgnoreCase(user.getRole())) {
             VBox root = new VBox(10);
             root.setAlignment(Pos.CENTER);
@@ -70,6 +75,7 @@ public class ProductManagementView {
 
             return new Scene(root, 500, 300);
         }
+
         Label titleLabel = new Label("Product Management");
         Label userLabel = new Label("User: " + user.getUsername());
 
@@ -297,7 +303,7 @@ public class ProductManagementView {
     }
 
     private void goBackToDashboard() {
-        DashboardView dashboardView = new DashboardView(stage, user);
+        DashboardView dashboardView = new DashboardView(stage);
         stage.setScene(dashboardView.createScene());
         stage.setTitle("Coffee POS - Dashboard");
     }
