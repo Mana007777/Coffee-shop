@@ -80,6 +80,24 @@ public class Main {
             );
         }
 
-        System.out.println("Total = $" + posService.calculateTotal());
+        double total = posService.calculateTotal();
+        System.out.println("Total = $" + total);
+
+        System.out.print("Enter amount paid: ");
+        double amountPaid = scanner.nextDouble();
+
+        if (amountPaid < total) {
+            System.out.println("Insufficient payment.");
+            return;
+        }
+
+        int orderId = posService.checkout("TAKEAWAY", "CASH", amountPaid, user.getId());
+
+        if (orderId != -1) {
+            System.out.println("Order saved successfully. Order ID: " + orderId);
+            System.out.println("Change = $" + (amountPaid - total));
+        } else {
+            System.out.println("Failed to save order.");
+        }
     }
 }
