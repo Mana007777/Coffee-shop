@@ -1,5 +1,6 @@
 package com.coffeeshop.pos.ui;
 
+import com.coffeeshop.pos.config.SessionManager;
 import com.coffeeshop.pos.model.Order;
 import com.coffeeshop.pos.model.OrderItem;
 import com.coffeeshop.pos.model.User;
@@ -22,16 +23,14 @@ import java.util.List;
 public class SalesHistoryView {
 
     private final Stage stage;
-    private final User user;
     private final OrderService orderService;
 
     private final ListView<Order> ordersListView;
     private final ListView<OrderItem> orderItemsListView;
     private final Label statusLabel;
 
-    public SalesHistoryView(Stage stage, User user) {
+    public SalesHistoryView(Stage stage) {
         this.stage = stage;
-        this.user = user;
         this.orderService = new OrderService();
 
         this.ordersListView = new ListView<>();
@@ -40,6 +39,13 @@ public class SalesHistoryView {
     }
 
     public Scene createScene() {
+        User user = SessionManager.getCurrentUser();
+
+        if (user == null) {
+            LoginView loginView = new LoginView(stage);
+            return loginView.createScene();
+        }
+
         Label titleLabel = new Label("Sales History");
         Label userLabel = new Label("User: " + user.getUsername());
 
@@ -116,7 +122,7 @@ public class SalesHistoryView {
     }
 
     private void goBackToDashboard() {
-        DashboardView dashboardView = new DashboardView(stage, user);
+        DashboardView dashboardView = new DashboardView(stage);
         stage.setScene(dashboardView.createScene());
         stage.setTitle("Coffee POS - Dashboard");
     }
