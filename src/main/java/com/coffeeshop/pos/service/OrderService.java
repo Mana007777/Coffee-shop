@@ -115,5 +115,50 @@ public class OrderService {
                             " | Revenue: $" + report.getTotalRevenue()
             );
         }
+
+    }
+    public String buildTodaySalesReport() {
+        String today = java.time.LocalDate.now().toString();
+        return buildSalesReportByDate(today);
+    }
+
+    public String buildSalesReportByDate(String date) {
+        List<Order> orders = getOrdersByDate(date);
+        double totalSales = getTotalSalesByDate(date);
+
+        return "Sales Report for " + date + "\n" +
+                "Number of orders: " + orders.size() + "\n" +
+                "Total sales: $" + totalSales;
+    }
+
+    public String buildSalesReportBetweenDates(String startDate, String endDate) {
+        List<Order> orders = getOrdersBetweenDates(startDate, endDate);
+        double totalSales = getTotalSalesBetweenDates(startDate, endDate);
+
+        return "Sales Report from " + startDate + " to " + endDate + "\n" +
+                "Number of orders: " + orders.size() + "\n" +
+                "Total sales: $" + totalSales;
+    }
+
+    public String buildTopSellingProductsReport() {
+        List<ProductSalesReport> reports = getTopSellingProducts();
+
+        if (reports.isEmpty()) {
+            return "No product sales data found.";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Top-Selling Products Report:\n");
+
+        for (ProductSalesReport report : reports) {
+            builder.append(report.getProductName())
+                    .append(" | Quantity Sold: ")
+                    .append(report.getTotalQuantitySold())
+                    .append(" | Revenue: $")
+                    .append(report.getTotalRevenue())
+                    .append("\n");
+        }
+
+        return builder.toString();
     }
 }
