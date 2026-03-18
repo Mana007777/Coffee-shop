@@ -13,9 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -47,9 +45,26 @@ public class CategoryManagementView {
         }
 
         Label titleLabel = new Label("Category Management");
+        titleLabel.setStyle("""
+                -fx-text-fill: white;
+                -fx-font-size: 28px;
+                -fx-font-weight: bold;
+                """);
+
         Label userLabel = new Label("User: " + user.getUsername());
+        userLabel.setStyle("""
+                -fx-text-fill: rgba(255,255,255,0.92);
+                -fx-font-size: 14px;
+                -fx-font-weight: 600;
+                """);
+
+        VBox header = new VBox(6, titleLabel, userLabel);
+        CoffeeTheme.styleHeaderBar(header);
 
         categoryNameField.setPromptText("Category Name");
+        CoffeeTheme.styleTextField(categoryNameField);
+        CoffeeTheme.styleListView(categoryListView);
+        CoffeeTheme.styleStatusLabel(statusLabel);
 
         loadCategories();
 
@@ -57,36 +72,37 @@ public class CategoryManagementView {
         Button refreshButton = new Button("Refresh");
         Button backButton = new Button("Back");
 
+        CoffeeTheme.stylePrimaryButton(addCategoryButton);
+        CoffeeTheme.styleSecondaryButton(refreshButton);
+        CoffeeTheme.styleGhostButton(backButton);
+
         addCategoryButton.setOnAction(event -> addCategory());
         refreshButton.setOnAction(event -> refreshCategories());
         backButton.setOnAction(event -> goBackToDashboard());
 
-        VBox centerPanel = new VBox(12,
-                new Label("Categories"),
-                categoryListView,
-                new Label("Add New Category"),
-                categoryNameField,
-                addCategoryButton
-        );
-        centerPanel.setAlignment(Pos.CENTER);
-        centerPanel.setPadding(new Insets(10));
+        Label categoriesLabel = new Label("Categories");
+        CoffeeTheme.styleSectionTitle(categoriesLabel);
 
-        HBox bottomControls = new HBox(10, refreshButton, backButton);
-        bottomControls.setAlignment(Pos.CENTER);
+        VBox listCard = CoffeeTheme.createCard(14);
+        listCard.getChildren().addAll(categoriesLabel, categoryListView);
 
-        VBox topPanel = new VBox(8, titleLabel, userLabel);
-        topPanel.setAlignment(Pos.CENTER);
+        Label addLabel = new Label("Add New Category");
+        CoffeeTheme.styleSectionTitle(addLabel);
 
-        VBox bottomPanel = new VBox(8, bottomControls, statusLabel);
-        bottomPanel.setAlignment(Pos.CENTER);
+        VBox formCard = CoffeeTheme.createCard(14);
+        formCard.getChildren().addAll(addLabel, categoryNameField, addCategoryButton, statusLabel);
 
-        BorderPane root = new BorderPane();
-        root.setPadding(new Insets(20));
-        root.setTop(topPanel);
-        root.setCenter(centerPanel);
-        root.setBottom(bottomPanel);
+        HBox bottomButtons = new HBox(12, refreshButton, backButton);
+        bottomButtons.setAlignment(Pos.CENTER_LEFT);
 
-        return new Scene(root, 700, 550);
+        VBox footerCard = CoffeeTheme.createCard(12);
+        footerCard.getChildren().add(bottomButtons);
+
+        VBox root = new VBox(24, header, listCard, formCard, footerCard);
+        root.setPadding(new Insets(26));
+        CoffeeTheme.styleRoot(root);
+
+        return new Scene(root, 840, 700);
     }
 
     private void loadCategories() {
@@ -99,24 +115,24 @@ public class CategoryManagementView {
         String name = categoryNameField.getText().trim();
 
         if (name.isEmpty()) {
-            statusLabel.setText("Enter a category name.");
+            CoffeeTheme.setStatusError(statusLabel, "Enter a category name.");
             return;
         }
 
         boolean added = categoryService.addCategory(name);
 
         if (added) {
-            statusLabel.setText("Category added successfully.");
+            CoffeeTheme.setStatusSuccess(statusLabel, "Category added successfully.");
             categoryNameField.clear();
             loadCategories();
         } else {
-            statusLabel.setText("Failed to add category. It may already exist.");
+            CoffeeTheme.setStatusError(statusLabel, "Failed to add category. It may already exist.");
         }
     }
 
     private void refreshCategories() {
         loadCategories();
-        statusLabel.setText("Categories refreshed.");
+        CoffeeTheme.setStatusNeutral(statusLabel, "Categories refreshed.");
     }
 
     private void goBackToDashboard() {
