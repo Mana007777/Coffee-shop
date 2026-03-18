@@ -2,8 +2,8 @@ package com.coffeeshop.pos;
 
 import com.coffeeshop.pos.config.DataSeeder;
 import com.coffeeshop.pos.config.DatabaseInitializer;
-import com.coffeeshop.pos.dao.ProductDao;
 import com.coffeeshop.pos.model.Product;
+import com.coffeeshop.pos.service.ProductService;
 
 import java.util.List;
 
@@ -14,10 +14,10 @@ public class Main {
         DatabaseInitializer.initializeDatabase();
         DataSeeder.seedData();
 
-        ProductDao productDao = new ProductDao();
-        List<Product> products = productDao.getAllProducts();
+        ProductService productService = new ProductService();
+        List<Product> products = productService.getAvailableProducts();
 
-        System.out.println("Products in database:");
+        System.out.println("Available products:");
         for (Product product : products) {
             System.out.println(
                     product.getId() + " | " +
