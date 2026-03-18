@@ -57,7 +57,19 @@ public class ProductManagementView {
         this.statusLabel = new Label();
     }
 
+
     public Scene createScene() {
+        if (!"ADMIN".equalsIgnoreCase(user.getRole())) {
+            VBox root = new VBox(10);
+            root.setAlignment(Pos.CENTER);
+            root.setPadding(new Insets(20));
+            root.getChildren().addAll(
+                    new Label("Access denied."),
+                    new Label("Only admins can access Product Management.")
+            );
+
+            return new Scene(root, 500, 300);
+        }
         Label titleLabel = new Label("Product Management");
         Label userLabel = new Label("User: " + user.getUsername());
 

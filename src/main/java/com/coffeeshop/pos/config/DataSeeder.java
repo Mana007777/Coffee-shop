@@ -8,6 +8,7 @@ public class DataSeeder {
 
     public static void seedData() {
         insertDefaultAdmin();
+        insertDefaultCashier();
         insertDefaultCategories();
         insertDefaultProducts();
     }
@@ -85,6 +86,26 @@ public class DataSeeder {
 
         } catch (SQLException e) {
             System.out.println("Failed to insert product " + name + ": " + e.getMessage());
+        }
+    }
+    private static void insertDefaultCashier() {
+        String sql = """
+            INSERT OR IGNORE INTO users (username, password, role)
+            VALUES (?, ?, ?)
+            """;
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, "cashier");
+            statement.setString(2, "cashier123");
+            statement.setString(3, "CASHIER");
+            statement.executeUpdate();
+
+            System.out.println("Default cashier ready.");
+
+        } catch (SQLException e) {
+            System.out.println("Failed to insert default cashier: " + e.getMessage());
         }
     }
 }

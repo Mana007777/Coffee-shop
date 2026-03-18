@@ -78,17 +78,19 @@ public class DashboardView {
         VBox root = new VBox(12);
         root.setPadding(new Insets(20));
         root.setAlignment(Pos.CENTER);
-        root.getChildren().addAll(
-                titleLabel,
-                welcomeLabel,
-                newSaleButton,
-                salesHistoryButton,
-                reportsButton,
-                productsButton,
-                categoriesButton,
-                logoutButton
-        );
+
+        root.getChildren().addAll(titleLabel, welcomeLabel, newSaleButton, salesHistoryButton);
+
+        if (isAdmin()) {
+            root.getChildren().addAll(reportsButton, productsButton, categoriesButton);
+        }
+
+        root.getChildren().add(logoutButton);
 
         return new Scene(root, 500, 450);
+    }
+
+    private boolean isAdmin() {
+        return "ADMIN".equalsIgnoreCase(user.getRole());
     }
 }
