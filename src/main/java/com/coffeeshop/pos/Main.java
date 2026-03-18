@@ -2,7 +2,6 @@ package com.coffeeshop.pos;
 
 import com.coffeeshop.pos.config.DataSeeder;
 import com.coffeeshop.pos.config.DatabaseInitializer;
-import com.coffeeshop.pos.model.CartItem;
 import com.coffeeshop.pos.model.Product;
 import com.coffeeshop.pos.model.User;
 import com.coffeeshop.pos.service.PosService;
@@ -31,57 +30,64 @@ public class Main {
 
         ProductService productService = new ProductService();
         PosService posService = new PosService();
-
-        List<Product> products = productService.getAvailableProducts();
-
-        System.out.println("\nAvailable products:");
-        for (Product product : products) {
-            System.out.println(
-                    product.getId() + " | " +
-                            product.getName() + " | $" +
-                            product.getPrice() + " | stock: " +
-                            product.getStockQty()
-            );
-        }
-
         Scanner scanner = new Scanner(System.in);
 
-        System.out.print("\nEnter product id: ");
-        int productId = scanner.nextInt();
+        boolean addingProducts = true;
 
-        Product selectedProduct = productService.getAvailableProductById(productId);
+        while (addingProducts) {
+            List<Product> products = productService.getAvailableProducts();
 
-        if (selectedProduct == null) {
-            System.out.println("Invalid product.");
-            return;
+            System.out.println("\nAvailable products:");
+            for (Product product : products) {
+                System.out.println(
+                        product.getId() + " | " +
+                                product.getName() + " | $" +
+                                product.getPrice() + " | stock: " +
+                                product.getStockQty()
+                );
+            }
+
+            System.out.print("\nEnter product id: ");
+            int productId = scanner.nextInt();
+
+            Product selectedProduct = productService.getAvailableProductById(productId);
+
+            if (selectedProduct == null) {
+                System.out.println("Invalid product.");
+                continue;
+            }
+
+            System.out.print("Enter quantity: ");
+            int quantity = scanner.nextInt();
+
+            if (quantity <= 0) {
+                System.out.println("Invalid quantity.");
+                continue;
+            }
+
+            if (quantity > selectedProduct.getStockQty()) {
+                System.out.println("Not enough stock.");
+                continue;
+            }
+
+            posService.addToCart(selectedProduct, quantity);
+            posService.printCart();
+
+            System.out.print("\nAdd another product? (y/n): ");
+            String answer = scanner.next();
+
+            if (!answer.equalsIgnoreCase("y")) {
+                addingProducts = false;
+            }
         }
 
-        System.out.print("Enter quantity: ");
-        int quantity = scanner.nextInt();
-
-        if (quantity <= 0) {
-            System.out.println("Invalid quantity.");
+        if (posService.isCartEmpty()) {
+            System.out.println("Cart is empty. Checkout cancelled.");
             return;
-        }
-
-        if (quantity > selectedProduct.getStockQty()) {
-            System.out.println("Not enough stock.");
-            return;
-        }
-
-        posService.addToCart(selectedProduct, quantity);
-
-        System.out.println("\nCart:");
-        for (CartItem item : posService.getCartItems()) {
-            System.out.println(
-                    item.getProduct().getName() + " x " +
-                            item.getQuantity() + " = $" +
-                            item.getSubtotal()
-            );
         }
 
         double total = posService.calculateTotal();
-        System.out.println("Total = $" + total);
+        System.out.println("\nFinal total = $" + total);
 
         System.out.print("Enter amount paid: ");
         double amountPaid = scanner.nextDouble();
@@ -96,6 +102,7 @@ public class Main {
         if (orderId != -1) {
             System.out.println("Order saved successfully. Order ID: " + orderId);
             System.out.println("Change = $" + (amountPaid - total));
+            posService.clearCart();
         } else {
             System.out.println("Failed to save order.");
         }

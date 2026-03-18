@@ -22,6 +22,13 @@ public class PosService {
     }
 
     public void addToCart(Product product, int quantity) {
+        for (CartItem item : cartItems) {
+            if (item.getProduct().getId() == product.getId()) {
+                item.setQuantity(item.getQuantity() + quantity);
+                return;
+            }
+        }
+
         CartItem cartItem = new CartItem(product, quantity);
         cartItems.add(cartItem);
     }
@@ -92,5 +99,26 @@ public class PosService {
             System.out.println("Transaction failed: " + e.getMessage());
             return -1;
         }
+    }
+    public void clearCart() {
+        cartItems.clear();
+    }
+    public void printCart() {
+        if (cartItems.isEmpty()) {
+            System.out.println("Cart is empty.");
+            return;
+        }
+
+        System.out.println("\nCurrent cart:");
+        for (CartItem item : cartItems) {
+            System.out.println(
+                    item.getProduct().getId() + " | " +
+                            item.getProduct().getName() + " x " +
+                            item.getQuantity() + " = $" +
+                            item.getSubtotal()
+            );
+        }
+
+        System.out.println("Total = $" + calculateTotal());
     }
 }
