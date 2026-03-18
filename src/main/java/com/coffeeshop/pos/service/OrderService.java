@@ -63,4 +63,20 @@ public class OrderService {
             );
         }
     }
+    public List<Order> getOrdersByDate(String date) {
+        return orderDao.getOrdersByDate(date);
+    }
+
+    public double getTotalSalesByDate(String date) {
+        return orderDao.getTotalSalesByDate(date);
+    }
+
+    public void printDailySalesReport(String date) {
+        List<Order> orders = getOrdersByDate(date);
+        double totalSales = getTotalSalesByDate(date);
+
+        System.out.println("\nDaily Sales Report for " + date);
+        System.out.println("Number of orders: " + orders.size());
+        System.out.println("Total sales: $" + totalSales);
+    }
 }

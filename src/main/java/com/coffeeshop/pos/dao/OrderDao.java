@@ -164,4 +164,57 @@ public class OrderDao {
         item.setNote(resultSet.getString("note"));
         return item;
     }
+    public List<Order> getOrdersByDate(String date) {
+        List<Order> orders = new ArrayList<>();
+
+        String sql = """
+            SELECT id, order_type, total_amount, payment_method,
+                   amount_paid, change_amount, created_at, cashier_id
+            FROM orders
+            WHERE DATE(created_at) = ?
+            ORDER BY id DESC
+            """;
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, date);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Order order = mapResultSetToOrder(resultSet);
+                    orders.add(order);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Failed to fetch orders by date: " + e.getMessage());
+        }
+
+        return orders;
+    }
+    public double getTotalSalesByDate(String date) {
+        String sql = """
+            SELECT COALESCE(SUM(total_amount), 0)
+            FROM orders
+            WHERE DATE(created_at) = ?
+            """;
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, date);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getDouble(1);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Failed to calculate total sales: " + e.getMessage());
+        }
+
+        return 0.0;
+    }
 }

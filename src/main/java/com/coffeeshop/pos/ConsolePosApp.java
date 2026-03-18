@@ -8,7 +8,7 @@ import com.coffeeshop.pos.service.UserService;
 import com.coffeeshop.pos.service.OrderService;
 import java.util.List;
 import java.util.Scanner;
-
+import java.time.LocalDate;
 public class ConsolePosApp {
 
     private final UserService userService;
@@ -98,7 +98,8 @@ public class ConsolePosApp {
             5. Checkout
             6. View sales history
             7. View order details
-            8. Cancel order
+            8. View today's sales report
+            9. Cancel order
             """);
     }
 
@@ -219,5 +220,9 @@ public class ConsolePosApp {
         System.out.print("Enter order id: ");
         int orderId = scanner.nextInt();
         orderService.printOrderDetails(orderId);
+    }
+    private void viewTodaySalesReport() {
+        String today = LocalDate.now().toString();
+        orderService.printDailySalesReport(today);
     }
 }
