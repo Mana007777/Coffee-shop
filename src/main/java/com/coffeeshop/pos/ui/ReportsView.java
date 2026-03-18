@@ -10,9 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class ReportsView {
@@ -46,21 +44,50 @@ public class ReportsView {
         }
 
         Label titleLabel = new Label("Reports");
+        titleLabel.setStyle("""
+                -fx-text-fill: white;
+                -fx-font-size: 28px;
+                -fx-font-weight: bold;
+                """);
+
         Label userLabel = new Label("User: " + user.getUsername());
+        userLabel.setStyle("""
+                -fx-text-fill: rgba(255,255,255,0.92);
+                -fx-font-size: 14px;
+                -fx-font-weight: 600;
+                """);
+
+        VBox header = new VBox(6, titleLabel, userLabel);
+        CoffeeTheme.styleHeaderBar(header);
 
         dateField.setPromptText("YYYY-MM-DD");
         startDateField.setPromptText("Start Date (YYYY-MM-DD)");
         endDateField.setPromptText("End Date (YYYY-MM-DD)");
 
+        CoffeeTheme.styleTextField(dateField);
+        CoffeeTheme.styleTextField(startDateField);
+        CoffeeTheme.styleTextField(endDateField);
+
         resultArea.setEditable(false);
         resultArea.setWrapText(true);
+        resultArea.setPrefRowCount(18);
+        CoffeeTheme.styleTextArea(resultArea);
+
+        CoffeeTheme.styleStatusLabel(statusLabel);
 
         Button todayReportButton = new Button("Today's Report");
         Button dateReportButton = new Button("Report by Date");
-        Button rangeReportButton = new Button("Report by Date Range");
+        Button rangeReportButton = new Button("Date Range Report");
         Button topProductsButton = new Button("Top Products");
         Button clearButton = new Button("Clear");
         Button backButton = new Button("Back");
+
+        CoffeeTheme.stylePrimaryButton(todayReportButton);
+        CoffeeTheme.styleSecondaryButton(dateReportButton);
+        CoffeeTheme.styleSecondaryButton(rangeReportButton);
+        CoffeeTheme.stylePrimaryButton(topProductsButton);
+        CoffeeTheme.styleGhostButton(clearButton);
+        CoffeeTheme.styleGhostButton(backButton);
 
         todayReportButton.setOnAction(event -> showTodayReport());
         dateReportButton.setOnAction(event -> showDateReport());
@@ -69,70 +96,54 @@ public class ReportsView {
         clearButton.setOnAction(event -> clearOutput());
         backButton.setOnAction(event -> goBackToDashboard());
 
-        HBox dateControls = new HBox(10,
-                new Label("Date:"),
-                dateField,
-                dateReportButton
-        );
-        dateControls.setAlignment(Pos.CENTER_LEFT);
+        Label singleDateTitle = new Label("Report by Specific Date");
+        CoffeeTheme.styleSectionTitle(singleDateTitle);
 
-        HBox rangeControls = new HBox(10,
-                new Label("From:"),
-                startDateField,
-                new Label("To:"),
-                endDateField,
-                rangeReportButton
-        );
-        rangeControls.setAlignment(Pos.CENTER_LEFT);
+        HBox dateRow = new HBox(12, dateField, dateReportButton);
+        dateRow.setAlignment(Pos.CENTER_LEFT);
 
-        HBox actionControls = new HBox(10,
-                todayReportButton,
-                topProductsButton,
-                clearButton,
-                backButton
-        );
-        actionControls.setAlignment(Pos.CENTER);
+        VBox dateCard = CoffeeTheme.createCard(14);
+        dateCard.getChildren().addAll(singleDateTitle, dateRow);
 
-        VBox topPanel = new VBox(10,
-                titleLabel,
-                userLabel,
-                dateControls,
-                rangeControls,
-                actionControls
-        );
-        topPanel.setAlignment(Pos.CENTER);
-        topPanel.setPadding(new Insets(10));
+        Label rangeTitle = new Label("Report by Date Range");
+        CoffeeTheme.styleSectionTitle(rangeTitle);
 
-        VBox centerPanel = new VBox(10,
-                new Label("Report Output"),
-                resultArea,
-                statusLabel
-        );
-        centerPanel.setPadding(new Insets(10));
+        HBox rangeRow = new HBox(12, startDateField, endDateField, rangeReportButton);
+        rangeRow.setAlignment(Pos.CENTER_LEFT);
 
-        BorderPane root = new BorderPane();
-        root.setPadding(new Insets(20));
-        root.setTop(topPanel);
-        root.setCenter(centerPanel);
+        VBox rangeCard = CoffeeTheme.createCard(14);
+        rangeCard.getChildren().addAll(rangeTitle, rangeRow);
 
-        return new Scene(root, 1000, 650);
+        HBox actionRow = new HBox(12, todayReportButton, topProductsButton, clearButton, backButton);
+        actionRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox outputCard = CoffeeTheme.createCard(14);
+        Label outputTitle = new Label("Report Output");
+        CoffeeTheme.styleSectionTitle(outputTitle);
+        outputCard.getChildren().addAll(outputTitle, resultArea, statusLabel);
+
+        VBox root = new VBox(24, header, dateCard, rangeCard, actionRow, outputCard);
+        root.setPadding(new Insets(26));
+        CoffeeTheme.styleRoot(root);
+
+        return new Scene(root, 1100, 780);
     }
 
     private void showTodayReport() {
         resultArea.setText(orderService.buildTodaySalesReport());
-        statusLabel.setText("Loaded today's report.");
+        CoffeeTheme.setStatusSuccess(statusLabel, "Loaded today's report.");
     }
 
     private void showDateReport() {
         String date = dateField.getText().trim();
 
         if (!isValidDate(date)) {
-            statusLabel.setText("Invalid date format. Use YYYY-MM-DD.");
+            CoffeeTheme.setStatusError(statusLabel, "Invalid date format. Use YYYY-MM-DD.");
             return;
         }
 
         resultArea.setText(orderService.buildSalesReportByDate(date));
-        statusLabel.setText("Loaded report for " + date + ".");
+        CoffeeTheme.setStatusSuccess(statusLabel, "Loaded report for " + date + ".");
     }
 
     private void showDateRangeReport() {
@@ -140,22 +151,22 @@ public class ReportsView {
         String endDate = endDateField.getText().trim();
 
         if (!isValidDate(startDate) || !isValidDate(endDate)) {
-            statusLabel.setText("Invalid date range. Use YYYY-MM-DD.");
+            CoffeeTheme.setStatusError(statusLabel, "Invalid date range. Use YYYY-MM-DD.");
             return;
         }
 
         if (java.time.LocalDate.parse(startDate).isAfter(java.time.LocalDate.parse(endDate))) {
-            statusLabel.setText("Start date cannot be after end date.");
+            CoffeeTheme.setStatusError(statusLabel, "Start date cannot be after end date.");
             return;
         }
 
         resultArea.setText(orderService.buildSalesReportBetweenDates(startDate, endDate));
-        statusLabel.setText("Loaded date range report.");
+        CoffeeTheme.setStatusSuccess(statusLabel, "Loaded date range report.");
     }
 
     private void showTopProductsReport() {
         resultArea.setText(orderService.buildTopSellingProductsReport());
-        statusLabel.setText("Loaded top-selling products report.");
+        CoffeeTheme.setStatusSuccess(statusLabel, "Loaded top-selling products report.");
     }
 
     private void clearOutput() {
@@ -163,7 +174,7 @@ public class ReportsView {
         dateField.clear();
         startDateField.clear();
         endDateField.clear();
-        statusLabel.setText("Cleared.");
+        CoffeeTheme.setStatusNeutral(statusLabel, "Cleared.");
     }
 
     private boolean isValidDate(String value) {
