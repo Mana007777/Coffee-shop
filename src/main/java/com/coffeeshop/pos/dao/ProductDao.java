@@ -71,4 +71,17 @@ public class ProductDao {
 
         return null;
     }
+    public void reduceStock(Connection connection, int productId, int quantity) throws SQLException {
+        String sql = """
+            UPDATE products
+            SET stock_qty = stock_qty - ?
+            WHERE id = ?
+            """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, quantity);
+            statement.setInt(2, productId);
+            statement.executeUpdate();
+        }
+    }
 }

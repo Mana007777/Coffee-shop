@@ -4,8 +4,11 @@ import com.coffeeshop.pos.dao.OrderDao;
 import com.coffeeshop.pos.model.CartItem;
 import com.coffeeshop.pos.model.Order;
 import com.coffeeshop.pos.model.Product;
-
+import com.coffeeshop.pos.config.DatabaseConnection;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import com.coffeeshop.pos.dao.ProductDao;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +45,7 @@ public class PosService {
     }
 
     public int checkout(String orderType, String paymentMethod, double amountPaid, int cashierId) {
+
         double totalAmount = calculateTotal();
         double changeAmount = amountPaid - totalAmount;
 
@@ -51,16 +55,42 @@ public class PosService {
                 paymentMethod,
                 amountPaid,
                 changeAmount,
-                LocalDateTime.now().toString(),
+                java.time.LocalDateTime.now().toString(),
                 cashierId
         );
 
-        int orderId = orderDao.insertOrder(order);
+        try (Connection connection = DatabaseConnection.connect()) {
 
-        if (orderId != -1) {
-            orderDao.insertOrderItems(orderId, cartItems);
+            // START TRANSACTION
+            connection.setAutoCommit(false);
+
+            int orderId = orderDao.insertOrder(connection, order);
+
+            if (orderId == -1) {
+                connection.rollback();
+                return -1;
+            }
+
+            // Insert order items
+            orderDao.insertOrderItems(connection, orderId, cartItems);
+
+            // Reduce stock
+            for (CartItem item : cartItems) {
+                new ProductDao().reduceStock(
+                        connection,
+                        item.getProduct().getId(),
+                        item.getQuantity()
+                );
+            }
+
+            // COMMIT
+            connection.commit();
+
+            return orderId;
+
+        } catch (SQLException e) {
+            System.out.println("Transaction failed: " + e.getMessage());
+            return -1;
         }
-
-        return orderId;
     }
 }
