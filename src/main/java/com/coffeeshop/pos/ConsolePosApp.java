@@ -5,7 +5,7 @@ import com.coffeeshop.pos.model.User;
 import com.coffeeshop.pos.service.PosService;
 import com.coffeeshop.pos.service.ProductService;
 import com.coffeeshop.pos.service.UserService;
-
+import com.coffeeshop.pos.service.OrderService;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,12 +15,14 @@ public class ConsolePosApp {
     private final ProductService productService;
     private final PosService posService;
     private final Scanner scanner;
+    private final OrderService orderService;
 
     public ConsolePosApp() {
         this.userService = new UserService();
         this.productService = new ProductService();
         this.posService = new PosService();
         this.scanner = new Scanner(System.in);
+        this.orderService = new OrderService();
     }
 
     public void run() {
@@ -53,7 +55,8 @@ public class ConsolePosApp {
                         running = false;
                     }
                 }
-                case 6 -> {
+                case 6 -> orderService.printSalesHistory();
+                case 7 -> {
                     posService.clearCart();
                     System.out.println("Order cancelled.");
                     running = false;
@@ -85,15 +88,16 @@ public class ConsolePosApp {
 
     private void printMenu() {
         System.out.println("""
-                
-                Choose an option:
-                1. Add product to cart
-                2. Update cart item quantity
-                3. Remove item from cart
-                4. View cart
-                5. Checkout
-                6. Cancel order
-                """);
+            
+            Choose an option:
+            1. Add product to cart
+            2. Update cart item quantity
+            3. Remove item from cart
+            4. View cart
+            5. Checkout
+            6. View sales history
+            7. Cancel order
+            """);
     }
 
     private void addProductToCart() {
