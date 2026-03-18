@@ -57,9 +57,11 @@ public class DashboardView {
             stage.setTitle("Coffee POS - Reports");
         });
 
-        productsButton.setOnAction(event ->
-                System.out.println("Open Product Management screen")
-        );
+        productsButton.setOnAction(event -> {
+            ProductManagementView productManagementView = new ProductManagementView(stage, user);
+            stage.setScene(productManagementView.createScene());
+            stage.setTitle("Coffee POS - Product Management");
+        });
 
         categoriesButton.setOnAction(event ->
                 System.out.println("Open Category Management screen")
