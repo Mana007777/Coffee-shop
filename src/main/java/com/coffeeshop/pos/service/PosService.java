@@ -140,4 +140,32 @@ public class PosService {
             return -1;
         }
     }
+    public boolean removeFromCart(int productId) {
+        for (int i = 0; i < cartItems.size(); i++) {
+            if (cartItems.get(i).getProduct().getId() == productId) {
+                cartItems.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean updateCartItemQuantity(int productId, int newQuantity) {
+        if (newQuantity <= 0) {
+            return removeFromCart(productId);
+        }
+
+        for (CartItem item : cartItems) {
+            if (item.getProduct().getId() == productId) {
+                if (newQuantity > item.getProduct().getStockQty()) {
+                    return false;
+                }
+
+                item.setQuantity(newQuantity);
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
