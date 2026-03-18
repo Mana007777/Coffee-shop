@@ -1,5 +1,6 @@
 package com.coffeeshop.pos.ui;
 
+import com.coffeeshop.pos.config.SessionManager;
 import com.coffeeshop.pos.model.Category;
 import com.coffeeshop.pos.model.User;
 import com.coffeeshop.pos.service.CategoryService;
@@ -22,16 +23,14 @@ import java.util.List;
 public class CategoryManagementView {
 
     private final Stage stage;
-    private final User user;
     private final CategoryService categoryService;
 
     private final ListView<Category> categoryListView;
     private final TextField categoryNameField;
     private final Label statusLabel;
 
-    public CategoryManagementView(Stage stage, User user) {
+    public CategoryManagementView(Stage stage) {
         this.stage = stage;
-        this.user = user;
         this.categoryService = new CategoryService();
 
         this.categoryListView = new ListView<>();
@@ -40,6 +39,13 @@ public class CategoryManagementView {
     }
 
     public Scene createScene() {
+        User user = SessionManager.getCurrentUser();
+
+        if (user == null) {
+            LoginView loginView = new LoginView(stage);
+            return loginView.createScene();
+        }
+
         Label titleLabel = new Label("Category Management");
         Label userLabel = new Label("User: " + user.getUsername());
 
@@ -114,7 +120,7 @@ public class CategoryManagementView {
     }
 
     private void goBackToDashboard() {
-        DashboardView dashboardView = new DashboardView(stage, user);
+        DashboardView dashboardView = new DashboardView(stage);
         stage.setScene(dashboardView.createScene());
         stage.setTitle("Coffee POS - Dashboard");
     }
