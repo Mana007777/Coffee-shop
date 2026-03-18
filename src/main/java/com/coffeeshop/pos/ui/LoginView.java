@@ -47,7 +47,7 @@ public class LoginView {
             User user = userService.login(username, password);
 
             if (user != null) {
-                DashboardView dashboardView = new DashboardView(user);
+                DashboardView dashboardView = new DashboardView(stage, user);
                 Scene dashboardScene = dashboardView.createScene();
 
                 stage.setScene(dashboardScene);

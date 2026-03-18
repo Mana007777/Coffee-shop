@@ -7,12 +7,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class DashboardView {
 
+    private final Stage stage;
     private final User user;
 
-    public DashboardView(User user) {
+    public DashboardView(Stage stage, User user) {
+        this.stage = stage;
         this.user = user;
     }
 
@@ -36,9 +39,11 @@ public class DashboardView {
         categoriesButton.setMaxWidth(Double.MAX_VALUE);
         logoutButton.setMaxWidth(Double.MAX_VALUE);
 
-        newSaleButton.setOnAction(event ->
-                System.out.println("Open New Sale screen")
-        );
+        newSaleButton.setOnAction(event -> {
+            NewSaleView newSaleView = new NewSaleView(stage, user);
+            stage.setScene(newSaleView.createScene());
+            stage.setTitle("Coffee POS - New Sale");
+        });
 
         salesHistoryButton.setOnAction(event ->
                 System.out.println("Open Sales History screen")
@@ -56,9 +61,11 @@ public class DashboardView {
                 System.out.println("Open Category Management screen")
         );
 
-        logoutButton.setOnAction(event ->
-                System.out.println("Logout clicked")
-        );
+        logoutButton.setOnAction(event -> {
+            LoginView loginView = new LoginView(stage);
+            stage.setScene(loginView.createScene());
+            stage.setTitle("Coffee POS - Login");
+        });
 
         VBox root = new VBox(12);
         root.setPadding(new Insets(20));
