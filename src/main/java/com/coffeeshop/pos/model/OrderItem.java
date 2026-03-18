@@ -88,4 +88,11 @@ public class OrderItem {
     public void setNote(String note) {
         this.note = note;
     }
+    @Override
+    public String toString() {
+        return productName +
+                " | Qty: " + quantity +
+                " | Unit: $" + unitPrice +
+                " | Subtotal: $" + subtotal;
+    }
 }

@@ -88,4 +88,11 @@ public class Order {
     public void setCashierId(int cashierId) {
         this.cashierId = cashierId;
     }
+    @Override
+    public String toString() {
+        return "Order #" + id +
+                " | Total: $" + totalAmount +
+                " | Payment: " + paymentMethod +
+                " | Date: " + createdAt;
+    }
 }
