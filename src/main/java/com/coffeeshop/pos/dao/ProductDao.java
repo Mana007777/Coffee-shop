@@ -47,4 +47,28 @@ public class ProductDao {
         product.setActive(resultSet.getInt("is_active") == 1);
         return product;
     }
+    public Product findById(int id) {
+        String sql = """
+            SELECT id, name, category_id, price, stock_qty, is_active
+            FROM products
+            WHERE id = ?
+            """;
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, id);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return mapResultSetToProduct(resultSet);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Failed to fetch product by id: " + e.getMessage());
+        }
+
+        return null;
+    }
 }
