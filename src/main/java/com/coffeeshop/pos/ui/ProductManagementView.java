@@ -15,9 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -65,19 +63,35 @@ public class ProductManagementView {
         }
 
         if (!"ADMIN".equalsIgnoreCase(user.getRole())) {
-            VBox root = new VBox(10);
+            VBox root = CoffeeTheme.createCard(12);
             root.setAlignment(Pos.CENTER);
-            root.setPadding(new Insets(20));
             root.getChildren().addAll(
                     new Label("Access denied."),
                     new Label("Only admins can access Product Management.")
             );
-
+            CoffeeTheme.styleRoot(root);
             return new Scene(root, 500, 300);
         }
 
+        loadProducts();
+        loadCategories();
+
         Label titleLabel = new Label("Product Management");
-        Label userLabel = new Label("User: " + user.getUsername());
+        titleLabel.setStyle("""
+                -fx-text-fill: white;
+                -fx-font-size: 28px;
+                -fx-font-weight: bold;
+                """);
+
+        Label userLabel = new Label("Admin: " + user.getUsername());
+        userLabel.setStyle("""
+                -fx-text-fill: rgba(255,255,255,0.92);
+                -fx-font-size: 14px;
+                -fx-font-weight: 600;
+                """);
+
+        VBox header = new VBox(6, titleLabel, userLabel);
+        CoffeeTheme.styleHeaderBar(header);
 
         nameField.setPromptText("Product Name");
         priceField.setPromptText("Price");
@@ -85,8 +99,15 @@ public class ProductManagementView {
         newPriceField.setPromptText("New Price");
         newStockField.setPromptText("New Stock");
 
-        loadProducts();
-        loadCategories();
+        CoffeeTheme.styleTextField(nameField);
+        CoffeeTheme.styleTextField(priceField);
+        CoffeeTheme.styleTextField(stockField);
+        CoffeeTheme.styleTextField(newPriceField);
+        CoffeeTheme.styleTextField(newStockField);
+
+        CoffeeTheme.styleListView(productListView);
+        CoffeeTheme.styleListView(categoryListView);
+        CoffeeTheme.styleStatusLabel(statusLabel);
 
         Button addProductButton = new Button("Add Product");
         Button updatePriceButton = new Button("Update Price");
@@ -96,6 +117,14 @@ public class ProductManagementView {
         Button refreshButton = new Button("Refresh");
         Button backButton = new Button("Back");
 
+        CoffeeTheme.stylePrimaryButton(addProductButton);
+        CoffeeTheme.styleSecondaryButton(updatePriceButton);
+        CoffeeTheme.styleSecondaryButton(updateStockButton);
+        CoffeeTheme.stylePrimaryButton(activateButton);
+        CoffeeTheme.styleDangerButton(deactivateButton);
+        CoffeeTheme.styleGhostButton(refreshButton);
+        CoffeeTheme.styleGhostButton(backButton);
+
         addProductButton.setOnAction(event -> addProduct());
         updatePriceButton.setOnAction(event -> updateProductPrice());
         updateStockButton.setOnAction(event -> updateProductStock());
@@ -104,21 +133,33 @@ public class ProductManagementView {
         refreshButton.setOnAction(event -> refreshData());
         backButton.setOnAction(event -> goBackToDashboard());
 
-        VBox leftPanel = new VBox(10,
-                new Label("Products"),
-                productListView
-        );
-        leftPanel.setPrefWidth(500);
+        Label productsLabel = new Label("Products");
+        CoffeeTheme.styleSectionTitle(productsLabel);
 
-        VBox rightPanel = new VBox(10,
-                new Label("Categories"),
+        VBox leftPanel = CoffeeTheme.createCard(14);
+        leftPanel.setPrefWidth(520);
+        leftPanel.getChildren().addAll(productsLabel, productListView);
+
+        Label categoriesLabel = new Label("Categories");
+        CoffeeTheme.styleSectionTitle(categoriesLabel);
+
+        Label addLabel = new Label("Add New Product");
+        CoffeeTheme.styleSectionTitle(addLabel);
+
+        Label editLabel = new Label("Edit Selected Product");
+        CoffeeTheme.styleSectionTitle(editLabel);
+
+        VBox rightPanel = CoffeeTheme.createCard(12);
+        rightPanel.setPrefWidth(420);
+        rightPanel.getChildren().addAll(
+                categoriesLabel,
                 categoryListView,
-                new Label("Add New Product"),
+                addLabel,
                 nameField,
                 priceField,
                 stockField,
                 addProductButton,
-                new Label("Edit Selected Product"),
+                editLabel,
                 newPriceField,
                 updatePriceButton,
                 newStockField,
@@ -126,27 +167,21 @@ public class ProductManagementView {
                 activateButton,
                 deactivateButton
         );
-        rightPanel.setPrefWidth(350);
 
-        HBox centerPanel = new HBox(20, leftPanel, rightPanel);
+        HBox centerPanel = new HBox(24, leftPanel, rightPanel);
         centerPanel.setAlignment(Pos.CENTER);
 
-        HBox bottomControls = new HBox(10, refreshButton, backButton);
-        bottomControls.setAlignment(Pos.CENTER);
+        HBox footerButtons = new HBox(12, refreshButton, backButton);
+        footerButtons.setAlignment(Pos.CENTER_LEFT);
 
-        VBox topPanel = new VBox(8, titleLabel, userLabel);
-        topPanel.setAlignment(Pos.CENTER);
+        VBox footer = CoffeeTheme.createCard(12);
+        footer.getChildren().addAll(footerButtons, statusLabel);
 
-        VBox bottomPanel = new VBox(8, bottomControls, statusLabel);
-        bottomPanel.setAlignment(Pos.CENTER);
+        VBox root = new VBox(24, header, centerPanel, footer);
+        root.setPadding(new Insets(26));
+        CoffeeTheme.styleRoot(root);
 
-        BorderPane root = new BorderPane();
-        root.setPadding(new Insets(20));
-        root.setTop(topPanel);
-        root.setCenter(centerPanel);
-        root.setBottom(bottomPanel);
-
-        return new Scene(root, 1100, 700);
+        return new Scene(root, 1160, 780);
     }
 
     private void loadProducts() {
@@ -169,12 +204,12 @@ public class ProductManagementView {
         Category selectedCategory = categoryListView.getSelectionModel().getSelectedItem();
 
         if (name.isEmpty()) {
-            statusLabel.setText("Enter a product name.");
+            CoffeeTheme.setStatusError(statusLabel, "Enter a product name.");
             return;
         }
 
         if (selectedCategory == null) {
-            statusLabel.setText("Select a category.");
+            CoffeeTheme.setStatusError(statusLabel, "Select a category.");
             return;
         }
 
@@ -185,20 +220,20 @@ public class ProductManagementView {
             price = Double.parseDouble(priceText);
             stockQty = Integer.parseInt(stockText);
         } catch (NumberFormatException e) {
-            statusLabel.setText("Price and stock must be valid numbers.");
+            CoffeeTheme.setStatusError(statusLabel, "Price and stock must be valid numbers.");
             return;
         }
 
         boolean added = productService.addProduct(name, selectedCategory.getId(), price, stockQty);
 
         if (added) {
-            statusLabel.setText("Product added successfully.");
+            CoffeeTheme.setStatusSuccess(statusLabel, "Product added successfully.");
             nameField.clear();
             priceField.clear();
             stockField.clear();
             loadProducts();
         } else {
-            statusLabel.setText("Failed to add product.");
+            CoffeeTheme.setStatusError(statusLabel, "Failed to add product.");
         }
     }
 
@@ -206,7 +241,7 @@ public class ProductManagementView {
         Product selectedProduct = productListView.getSelectionModel().getSelectedItem();
 
         if (selectedProduct == null) {
-            statusLabel.setText("Select a product.");
+            CoffeeTheme.setStatusError(statusLabel, "Select a product.");
             return;
         }
 
@@ -216,18 +251,18 @@ public class ProductManagementView {
         try {
             newPrice = Double.parseDouble(newPriceText);
         } catch (NumberFormatException e) {
-            statusLabel.setText("Enter a valid new price.");
+            CoffeeTheme.setStatusError(statusLabel, "Enter a valid new price.");
             return;
         }
 
         boolean updated = productService.updateProductPrice(selectedProduct.getId(), newPrice);
 
         if (updated) {
-            statusLabel.setText("Product price updated.");
+            CoffeeTheme.setStatusSuccess(statusLabel, "Product price updated.");
             newPriceField.clear();
             loadProducts();
         } else {
-            statusLabel.setText("Failed to update product price.");
+            CoffeeTheme.setStatusError(statusLabel, "Failed to update product price.");
         }
     }
 
@@ -235,7 +270,7 @@ public class ProductManagementView {
         Product selectedProduct = productListView.getSelectionModel().getSelectedItem();
 
         if (selectedProduct == null) {
-            statusLabel.setText("Select a product.");
+            CoffeeTheme.setStatusError(statusLabel, "Select a product.");
             return;
         }
 
@@ -245,18 +280,18 @@ public class ProductManagementView {
         try {
             newStock = Integer.parseInt(newStockText);
         } catch (NumberFormatException e) {
-            statusLabel.setText("Enter a valid new stock quantity.");
+            CoffeeTheme.setStatusError(statusLabel, "Enter a valid new stock quantity.");
             return;
         }
 
         boolean updated = productService.updateProductStock(selectedProduct.getId(), newStock);
 
         if (updated) {
-            statusLabel.setText("Product stock updated.");
+            CoffeeTheme.setStatusSuccess(statusLabel, "Product stock updated.");
             newStockField.clear();
             loadProducts();
         } else {
-            statusLabel.setText("Failed to update product stock.");
+            CoffeeTheme.setStatusError(statusLabel, "Failed to update product stock.");
         }
     }
 
@@ -264,17 +299,17 @@ public class ProductManagementView {
         Product selectedProduct = productListView.getSelectionModel().getSelectedItem();
 
         if (selectedProduct == null) {
-            statusLabel.setText("Select a product.");
+            CoffeeTheme.setStatusError(statusLabel, "Select a product.");
             return;
         }
 
         boolean updated = productService.activateProduct(selectedProduct.getId());
 
         if (updated) {
-            statusLabel.setText("Product activated.");
+            CoffeeTheme.setStatusSuccess(statusLabel, "Product activated.");
             loadProducts();
         } else {
-            statusLabel.setText("Failed to activate product.");
+            CoffeeTheme.setStatusError(statusLabel, "Failed to activate product.");
         }
     }
 
@@ -282,24 +317,24 @@ public class ProductManagementView {
         Product selectedProduct = productListView.getSelectionModel().getSelectedItem();
 
         if (selectedProduct == null) {
-            statusLabel.setText("Select a product.");
+            CoffeeTheme.setStatusError(statusLabel, "Select a product.");
             return;
         }
 
         boolean updated = productService.deactivateProduct(selectedProduct.getId());
 
         if (updated) {
-            statusLabel.setText("Product deactivated.");
+            CoffeeTheme.setStatusSuccess(statusLabel, "Product deactivated.");
             loadProducts();
         } else {
-            statusLabel.setText("Failed to deactivate product.");
+            CoffeeTheme.setStatusError(statusLabel, "Failed to deactivate product.");
         }
     }
 
     private void refreshData() {
         loadProducts();
         loadCategories();
-        statusLabel.setText("Product data refreshed.");
+        CoffeeTheme.setStatusNeutral(statusLabel, "Product data refreshed.");
     }
 
     private void goBackToDashboard() {
