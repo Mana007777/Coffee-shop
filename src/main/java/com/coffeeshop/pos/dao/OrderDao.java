@@ -1,9 +1,7 @@
 package com.coffeeshop.pos.dao;
 
-import com.coffeeshop.pos.config.DatabaseConnection;
 import com.coffeeshop.pos.model.CartItem;
 import com.coffeeshop.pos.model.Order;
-import com.coffeeshop.pos.model.OrderItem;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,7 +11,7 @@ import java.util.List;
 
 public class OrderDao {
 
-    public int insertOrder(Order order) {
+    public int insertOrder(Connection connection, Order order) throws SQLException {
         String sql = """
                 INSERT INTO orders (
                     order_type,
@@ -26,8 +24,7 @@ public class OrderDao {
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        try (Connection connection = DatabaseConnection.connect();
-             PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
             statement.setString(1, order.getOrderType());
             statement.setDouble(2, order.getTotalAmount());
@@ -46,15 +43,12 @@ public class OrderDao {
                     }
                 }
             }
-
-        } catch (SQLException e) {
-            System.out.println("Failed to insert order: " + e.getMessage());
         }
 
         return -1;
     }
 
-    public void insertOrderItems(int orderId, List<CartItem> cartItems) {
+    public void insertOrderItems(Connection connection, int orderId, List<CartItem> cartItems) throws SQLException {
         String sql = """
                 INSERT INTO order_items (
                     order_id,
@@ -66,8 +60,7 @@ public class OrderDao {
                 ) VALUES (?, ?, ?, ?, ?, ?)
                 """;
 
-        try (Connection connection = DatabaseConnection.connect();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
 
             for (CartItem cartItem : cartItems) {
                 statement.setInt(1, orderId);
@@ -80,9 +73,6 @@ public class OrderDao {
             }
 
             statement.executeBatch();
-
-        } catch (SQLException e) {
-            System.out.println("Failed to insert order items: " + e.getMessage());
         }
     }
 }
