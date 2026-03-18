@@ -10,7 +10,10 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -28,7 +31,9 @@ public class NewSaleView {
     private final ListView<String> productListView;
     private final ListView<String> cartListView;
     private final Label totalLabel;
+    private final Label changeLabel;
     private final TextField quantityField;
+    private final TextField amountPaidField;
     private final Label statusLabel;
 
     public NewSaleView(Stage stage, User user) {
@@ -40,7 +45,9 @@ public class NewSaleView {
         this.productListView = new ListView<>();
         this.cartListView = new ListView<>();
         this.totalLabel = new Label("Total: $0.0");
+        this.changeLabel = new Label("Change: $0.0");
         this.quantityField = new TextField();
+        this.amountPaidField = new TextField();
         this.statusLabel = new Label();
     }
 
@@ -51,11 +58,16 @@ public class NewSaleView {
         loadProducts();
 
         quantityField.setPromptText("Quantity");
+        amountPaidField.setPromptText("Amount Paid");
 
         Button addToCartButton = new Button("Add to Cart");
+        Button checkoutButton = new Button("Checkout");
+        Button clearCartButton = new Button("Clear Cart");
         Button backButton = new Button("Back");
 
         addToCartButton.setOnAction(event -> addSelectedProductToCart());
+        checkoutButton.setOnAction(event -> handleCheckout());
+        clearCartButton.setOnAction(event -> clearCart());
         backButton.setOnAction(event -> goBackToDashboard());
 
         VBox leftPanel = new VBox(10,
@@ -67,25 +79,34 @@ public class NewSaleView {
         VBox rightPanel = new VBox(10,
                 new Label("Cart"),
                 cartListView,
-                totalLabel
+                totalLabel,
+                changeLabel
         );
         rightPanel.setPrefWidth(350);
 
         HBox centerPanel = new HBox(20, leftPanel, rightPanel);
         centerPanel.setAlignment(Pos.CENTER);
 
-        HBox controls = new HBox(10,
+        HBox addControls = new HBox(10,
                 new Label("Quantity:"),
                 quantityField,
-                addToCartButton,
+                addToCartButton
+        );
+        addControls.setAlignment(Pos.CENTER);
+
+        HBox checkoutControls = new HBox(10,
+                new Label("Amount Paid:"),
+                amountPaidField,
+                checkoutButton,
+                clearCartButton,
                 backButton
         );
-        controls.setAlignment(Pos.CENTER);
+        checkoutControls.setAlignment(Pos.CENTER);
 
         VBox topPanel = new VBox(8, titleLabel, cashierLabel);
         topPanel.setAlignment(Pos.CENTER);
 
-        VBox bottomPanel = new VBox(8, controls, statusLabel);
+        VBox bottomPanel = new VBox(10, addControls, checkoutControls, statusLabel);
         bottomPanel.setAlignment(Pos.CENTER);
 
         BorderPane root = new BorderPane();
@@ -94,7 +115,7 @@ public class NewSaleView {
         root.setCenter(centerPanel);
         root.setBottom(bottomPanel);
 
-        return new Scene(root, 900, 550);
+        return new Scene(root, 1000, 600);
     }
 
     private void loadProducts() {
@@ -170,6 +191,62 @@ public class NewSaleView {
         quantityField.clear();
         statusLabel.setText("Added to cart: " + selectedProduct.getName());
         refreshCart();
+    }
+
+    private void handleCheckout() {
+        if (posService.isCartEmpty()) {
+            statusLabel.setText("Cart is empty. Cannot checkout.");
+            return;
+        }
+
+        String amountPaidText = amountPaidField.getText().trim();
+
+        if (amountPaidText.isEmpty()) {
+            statusLabel.setText("Please enter amount paid.");
+            return;
+        }
+
+        double amountPaid;
+        try {
+            amountPaid = Double.parseDouble(amountPaidText);
+        } catch (NumberFormatException e) {
+            statusLabel.setText("Amount paid must be a number.");
+            return;
+        }
+
+        double total = posService.calculateTotal();
+
+        if (amountPaid < total) {
+            statusLabel.setText("Insufficient payment.");
+            return;
+        }
+
+        int orderId = posService.checkout("TAKEAWAY", "CASH", amountPaid, user.getId());
+
+        if (orderId == -1) {
+            statusLabel.setText("Failed to save order.");
+            return;
+        }
+
+        double change = amountPaid - total;
+        changeLabel.setText("Change: $" + change);
+        statusLabel.setText("Order saved successfully. Order ID: " + orderId);
+
+        posService.clearCart();
+        cartListView.getItems().clear();
+        totalLabel.setText("Total: $0.0");
+        amountPaidField.clear();
+        quantityField.clear();
+
+        loadProducts();
+    }
+
+    private void clearCart() {
+        posService.clearCart();
+        cartListView.getItems().clear();
+        totalLabel.setText("Total: $0.0");
+        changeLabel.setText("Change: $0.0");
+        statusLabel.setText("Cart cleared.");
     }
 
     private void goBackToDashboard() {
