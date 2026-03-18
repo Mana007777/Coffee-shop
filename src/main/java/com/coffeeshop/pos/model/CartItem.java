@@ -39,4 +39,8 @@ public class CartItem {
             this.subtotal = product.getPrice() * quantity;
         }
     }
+    @Override
+    public String toString() {
+        return product.getName() + " x " + quantity + " = $" + subtotal;
+    }
 }

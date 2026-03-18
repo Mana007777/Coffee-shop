@@ -76,4 +76,8 @@ public class Product {
     public void setActive(boolean active) {
         this.active = active;
     }
+    @Override
+    public String toString() {
+        return id + " | " + name + " | $" + price + " | stock: " + stockQty;
+    }
 }

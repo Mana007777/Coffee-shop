@@ -168,4 +168,10 @@ public class PosService {
 
         return false;
     }
+    public boolean removeCartItemByProductId(int productId) {
+        return removeFromCart(productId);
+    }
+    public boolean updateCartItemQuantityByProductId(int productId, int newQuantity) {
+        return updateCartItemQuantity(productId, newQuantity);
+    }
 }
