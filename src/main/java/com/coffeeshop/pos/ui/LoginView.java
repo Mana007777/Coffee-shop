@@ -1,5 +1,6 @@
 package com.coffeeshop.pos.ui;
 
+import com.coffeeshop.pos.config.SessionManager;
 import com.coffeeshop.pos.model.User;
 import com.coffeeshop.pos.service.UserService;
 import javafx.geometry.Insets;
@@ -11,7 +12,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import com.coffeeshop.pos.config.SessionManager;
 
 public class LoginView {
 
@@ -33,7 +33,6 @@ public class LoginView {
         passwordField.setPromptText("Password");
 
         Button loginButton = new Button("Login");
-
         Label statusLabel = new Label();
 
         loginButton.setOnAction(event -> {
