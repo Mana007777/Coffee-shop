@@ -2,10 +2,8 @@ package com.coffeeshop.pos;
 
 import com.coffeeshop.pos.config.DataSeeder;
 import com.coffeeshop.pos.config.DatabaseInitializer;
-import com.coffeeshop.pos.model.Product;
-import com.coffeeshop.pos.service.ProductService;
-
-import java.util.List;
+import com.coffeeshop.pos.model.User;
+import com.coffeeshop.pos.service.UserService;
 
 public class Main {
     public static void main(String[] args) {
@@ -14,19 +12,14 @@ public class Main {
         DatabaseInitializer.initializeDatabase();
         DataSeeder.seedData();
 
-        ProductService productService = new ProductService();
-        List<Product> products = productService.getAvailableProducts();
+        UserService userService = new UserService();
+        User user = userService.login("admin", "admin123");
 
-        System.out.println("Available products:");
-        for (Product product : products) {
-            System.out.println(
-                    product.getId() + " | " +
-                            product.getName() + " | " +
-                            product.getPrice() + " | stock: " +
-                            product.getStockQty()
-            );
+        if (user != null) {
+            System.out.println("Login successful.");
+            System.out.println("Welcome, " + user.getUsername() + " [" + user.getRole() + "]");
+        } else {
+            System.out.println("Invalid username or password.");
         }
-
-        System.out.println("Database is ready.");
     }
 }
