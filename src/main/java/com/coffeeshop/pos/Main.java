@@ -65,12 +65,20 @@ public class Main {
                 continue;
             }
 
-            if (quantity > selectedProduct.getStockQty()) {
-                System.out.println("Not enough stock.");
+            boolean added = posService.addToCart(selectedProduct, quantity);
+
+            if (!added) {
+                int alreadyInCart = posService.getQuantityInCart(selectedProduct.getId());
+
+                System.out.println(
+                        "Cannot add product. Stock available: " +
+                                selectedProduct.getStockQty() +
+                                ", already in cart: " +
+                                alreadyInCart
+                );
                 continue;
             }
 
-            posService.addToCart(selectedProduct, quantity);
             posService.printCart();
 
             System.out.print("\nAdd another product? (y/n): ");
