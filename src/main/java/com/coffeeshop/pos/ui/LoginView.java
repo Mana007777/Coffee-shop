@@ -11,6 +11,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import com.coffeeshop.pos.config.SessionManager;
 
 public class LoginView {
 
@@ -47,7 +48,9 @@ public class LoginView {
             User user = userService.login(username, password);
 
             if (user != null) {
-                DashboardView dashboardView = new DashboardView(stage, user);
+                SessionManager.setCurrentUser(user);
+
+                DashboardView dashboardView = new DashboardView(stage);
                 Scene dashboardScene = dashboardView.createScene();
 
                 stage.setScene(dashboardScene);

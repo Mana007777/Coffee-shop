@@ -18,13 +18,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
+import com.coffeeshop.pos.config.SessionManager;
+import com.coffeeshop.pos.model.User;
 import java.util.List;
 
 public class NewSaleView {
 
     private final Stage stage;
-    private final User user;
     private final ProductService productService;
     private final PosService posService;
 
@@ -36,9 +36,8 @@ public class NewSaleView {
     private final TextField amountPaidField;
     private final Label statusLabel;
 
-    public NewSaleView(Stage stage, User user) {
+    public NewSaleView(Stage stage) {
         this.stage = stage;
-        this.user = user;
         this.productService = new ProductService();
         this.posService = new PosService();
 
@@ -52,6 +51,12 @@ public class NewSaleView {
     }
 
     public Scene createScene() {
+        User user = SessionManager.getCurrentUser();
+
+        if (user == null) {
+            LoginView loginView = new LoginView(stage);
+            return loginView.createScene();
+        }
         Label titleLabel = new Label("New Sale");
         Label cashierLabel = new Label("Cashier: " + user.getUsername());
 
