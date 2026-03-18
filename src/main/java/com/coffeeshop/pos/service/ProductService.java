@@ -32,4 +32,17 @@ public class ProductService {
                 .filter(product -> product.getStockQty() > 0)
                 .collect(Collectors.toList());
     }
+    public Product getAvailableProductById(int id) {
+        Product product = productDao.findById(id);
+
+        if (product == null) {
+            return null;
+        }
+
+        if (!product.isActive() || product.getStockQty() <= 0) {
+            return null;
+        }
+
+        return product;
+    }
 }
