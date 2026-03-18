@@ -2,6 +2,7 @@ package com.coffeeshop.pos.service;
 
 import com.coffeeshop.pos.dao.OrderDao;
 import com.coffeeshop.pos.model.Order;
+import com.coffeeshop.pos.model.OrderItem;
 
 import java.util.List;
 
@@ -15,6 +16,10 @@ public class OrderService {
 
     public List<Order> getAllOrders() {
         return orderDao.getAllOrders();
+    }
+
+    public List<OrderItem> getOrderItemsByOrderId(int orderId) {
+        return orderDao.getOrderItemsByOrderId(orderId);
     }
 
     public void printSalesHistory() {
@@ -36,6 +41,25 @@ public class OrderService {
                             " | Payment: " + order.getPaymentMethod() +
                             " | Cashier ID: " + order.getCashierId() +
                             " | Date: " + order.getCreatedAt()
+            );
+        }
+    }
+
+    public void printOrderDetails(int orderId) {
+        List<OrderItem> items = getOrderItemsByOrderId(orderId);
+
+        if (items.isEmpty()) {
+            System.out.println("No items found for order ID: " + orderId);
+            return;
+        }
+
+        System.out.println("\nOrder Details for Order ID: " + orderId);
+        for (OrderItem item : items) {
+            System.out.println(
+                    item.getProductName() +
+                            " | Qty: " + item.getQuantity() +
+                            " | Unit Price: $" + item.getUnitPrice() +
+                            " | Subtotal: $" + item.getSubtotal()
             );
         }
     }

@@ -56,7 +56,8 @@ public class ConsolePosApp {
                     }
                 }
                 case 6 -> orderService.printSalesHistory();
-                case 7 -> {
+                case 7 -> viewOrderDetails();
+                case 8 -> {
                     posService.clearCart();
                     System.out.println("Order cancelled.");
                     running = false;
@@ -96,7 +97,8 @@ public class ConsolePosApp {
             4. View cart
             5. Checkout
             6. View sales history
-            7. Cancel order
+            7. View order details
+            8. Cancel order
             """);
     }
 
@@ -212,5 +214,10 @@ public class ConsolePosApp {
 
         System.out.println("Failed to save order.");
         return false;
+    }
+    private void viewOrderDetails() {
+        System.out.print("Enter order id: ");
+        int orderId = scanner.nextInt();
+        orderService.printOrderDetails(orderId);
     }
 }
