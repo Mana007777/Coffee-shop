@@ -3,7 +3,7 @@ package com.coffeeshop.pos.service;
 import com.coffeeshop.pos.dao.OrderDao;
 import com.coffeeshop.pos.model.Order;
 import com.coffeeshop.pos.model.OrderItem;
-
+import com.coffeeshop.pos.model.ProductSalesReport;
 import java.util.List;
 
 public class OrderService {
@@ -94,5 +94,26 @@ public class OrderService {
         System.out.println("\nSales Report from " + startDate + " to " + endDate);
         System.out.println("Number of orders: " + orders.size());
         System.out.println("Total sales: $" + totalSales);
+    }
+    public List<ProductSalesReport> getTopSellingProducts() {
+        return orderDao.getTopSellingProducts();
+    }
+
+    public void printTopSellingProductsReport() {
+        List<ProductSalesReport> reports = getTopSellingProducts();
+
+        if (reports.isEmpty()) {
+            System.out.println("No product sales data found.");
+            return;
+        }
+
+        System.out.println("\nTop-Selling Products Report:");
+        for (ProductSalesReport report : reports) {
+            System.out.println(
+                    report.getProductName() +
+                            " | Quantity Sold: " + report.getTotalQuantitySold() +
+                            " | Revenue: $" + report.getTotalRevenue()
+            );
+        }
     }
 }

@@ -12,6 +12,7 @@ import com.coffeeshop.pos.config.DatabaseConnection;
 import java.util.ArrayList;
 import java.util.List;
 import com.coffeeshop.pos.model.OrderItem;
+import com.coffeeshop.pos.model.ProductSalesReport;
 
 public class OrderDao {
 
@@ -271,5 +272,40 @@ public class OrderDao {
         }
 
         return 0.0;
+    }
+    public List<ProductSalesReport> getTopSellingProducts() {
+        List<ProductSalesReport> reports = new ArrayList<>();
+
+        String sql = """
+            SELECT p.name AS product_name,
+                   COALESCE(SUM(oi.quantity), 0) AS total_quantity_sold,
+                   COALESCE(SUM(oi.subtotal), 0) AS total_revenue
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            GROUP BY oi.product_id, p.name
+            ORDER BY total_quantity_sold DESC, total_revenue DESC
+            """;
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                ProductSalesReport report = mapResultSetToProductSalesReport(resultSet);
+                reports.add(report);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Failed to fetch top-selling products: " + e.getMessage());
+        }
+
+        return reports;
+    }
+    private ProductSalesReport mapResultSetToProductSalesReport(ResultSet resultSet) throws SQLException {
+        ProductSalesReport report = new ProductSalesReport();
+        report.setProductName(resultSet.getString("product_name"));
+        report.setTotalQuantitySold(resultSet.getInt("total_quantity_sold"));
+        report.setTotalRevenue(resultSet.getDouble("total_revenue"));
+        return report;
     }
 }

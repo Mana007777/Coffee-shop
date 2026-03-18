@@ -60,7 +60,8 @@ public class ConsolePosApp {
                 case 8 -> viewTodaySalesReport();
                 case 9 -> viewCustomDateSalesReport();
                 case 10 -> viewDateRangeSalesReport();
-                case 11 -> {
+                case 11 -> orderService.printTopSellingProductsReport();
+                case 12 -> {
                     posService.clearCart();
                     System.out.println("Order cancelled.");
                     running = false;
@@ -104,7 +105,8 @@ public class ConsolePosApp {
             8. View today's sales report
             9. View sales report by date
             10. View sales report by date range
-            11. Cancel order
+            11. View top-selling products report
+            12. Cancel order
             """);
     }
 
