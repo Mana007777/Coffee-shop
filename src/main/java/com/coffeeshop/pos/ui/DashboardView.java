@@ -7,7 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class DashboardView {
@@ -27,23 +27,28 @@ public class DashboardView {
         }
 
         Label titleLabel = new Label("Coffee POS Dashboard");
-        Label welcomeLabel = new Label(
-                "Welcome, " + user.getUsername() + " [" + user.getRole() + "]"
-        );
+        titleLabel.setStyle("""
+                -fx-text-fill: white;
+                -fx-font-size: 28px;
+                -fx-font-weight: bold;
+                """);
 
-        Button newSaleButton = new Button("New Sale");
-        Button salesHistoryButton = new Button("Sales History");
-        Button reportsButton = new Button("Reports");
-        Button productsButton = new Button("Product Management");
-        Button categoriesButton = new Button("Category Management");
-        Button logoutButton = new Button("Logout");
+        Label welcomeLabel = new Label("Welcome back, " + user.getUsername() + "  •  Role: " + user.getRole());
+        welcomeLabel.setStyle("""
+                -fx-text-fill: rgba(255,255,255,0.92);
+                -fx-font-size: 14px;
+                -fx-font-weight: 600;
+                """);
 
-        newSaleButton.setMaxWidth(Double.MAX_VALUE);
-        salesHistoryButton.setMaxWidth(Double.MAX_VALUE);
-        reportsButton.setMaxWidth(Double.MAX_VALUE);
-        productsButton.setMaxWidth(Double.MAX_VALUE);
-        categoriesButton.setMaxWidth(Double.MAX_VALUE);
-        logoutButton.setMaxWidth(Double.MAX_VALUE);
+        VBox header = new VBox(6, titleLabel, welcomeLabel);
+        CoffeeTheme.styleHeaderBar(header);
+
+        Button newSaleButton = createDashboardButton("☕ New Sale", "Start a fresh customer order");
+        Button salesHistoryButton = createDashboardButton("🧾 Sales History", "Review previous orders");
+        Button reportsButton = createDashboardButton("📈 Reports", "View date-based sales reports");
+        Button productsButton = createDashboardButton("📦 Product Management", "Add, edit, activate products");
+        Button categoriesButton = createDashboardButton("🏷 Category Management", "Manage product categories");
+        Button logoutButton = createDashboardButton("↩ Logout", "End current session");
 
         newSaleButton.setOnAction(event -> {
             NewSaleView newSaleView = new NewSaleView(stage);
@@ -77,24 +82,83 @@ public class DashboardView {
 
         logoutButton.setOnAction(event -> {
             SessionManager.clearSession();
-
             LoginView loginView = new LoginView(stage);
             stage.setScene(loginView.createScene());
             stage.setTitle("Coffee POS - Login");
         });
 
-        VBox root = new VBox(12);
-        root.setPadding(new Insets(20));
-        root.setAlignment(Pos.CENTER);
+        GridPane grid = new GridPane();
+        grid.setHgap(20);
+        grid.setVgap(20);
+        grid.setAlignment(Pos.CENTER);
 
-        root.getChildren().addAll(titleLabel, welcomeLabel, newSaleButton, salesHistoryButton);
+        grid.add(newSaleButton, 0, 0);
+        grid.add(salesHistoryButton, 1, 0);
 
         if (SessionManager.isAdmin()) {
-            root.getChildren().addAll(reportsButton, productsButton, categoriesButton);
+            grid.add(reportsButton, 0, 1);
+            grid.add(productsButton, 1, 1);
+            grid.add(categoriesButton, 0, 2);
+            grid.add(logoutButton, 1, 2);
+        } else {
+            grid.add(logoutButton, 0, 1, 2, 1);
         }
 
-        root.getChildren().add(logoutButton);
+        VBox root = new VBox(28, header, grid);
+        root.setPadding(new Insets(30));
+        root.setAlignment(Pos.TOP_CENTER);
+        CoffeeTheme.styleRoot(root);
 
-        return new Scene(root, 500, 450);
+        return new Scene(root, 980, 640);
+    }
+
+    private Button createDashboardButton(String title, String subtitle) {
+        Button button = new Button(title + "\n" + subtitle);
+        button.setWrapText(true);
+        button.setAlignment(Pos.CENTER_LEFT);
+        button.setPrefSize(360, 120);
+        button.setStyle("""
+                -fx-background-color: #FFFDF9;
+                -fx-text-fill: #2E211B;
+                -fx-font-size: 18px;
+                -fx-font-weight: bold;
+                -fx-background-radius: 20;
+                -fx-border-color: #E6D6C8;
+                -fx-border-radius: 20;
+                -fx-border-width: 1;
+                -fx-padding: 18;
+                -fx-cursor: hand;
+                -fx-effect: dropshadow(gaussian, rgba(70,40,20,0.10), 18, 0.15, 0, 6);
+                """);
+
+        button.setOnMouseEntered(e -> button.setStyle("""
+                -fx-background-color: #F8EFE6;
+                -fx-text-fill: #2E211B;
+                -fx-font-size: 18px;
+                -fx-font-weight: bold;
+                -fx-background-radius: 20;
+                -fx-border-color: #D7C0AC;
+                -fx-border-radius: 20;
+                -fx-border-width: 1;
+                -fx-padding: 18;
+                -fx-cursor: hand;
+                -fx-effect: dropshadow(gaussian, rgba(70,40,20,0.16), 20, 0.18, 0, 8);
+                """));
+
+        button.setOnMouseExited(e -> button.setStyle("""
+                -fx-background-color: #FFFDF9;
+                -fx-text-fill: #2E211B;
+                -fx-font-size: 18px;
+                -fx-font-weight: bold;
+                -fx-background-radius: 20;
+                -fx-border-color: #E6D6C8;
+                -fx-border-radius: 20;
+                -fx-border-width: 1;
+                -fx-padding: 18;
+                -fx-cursor: hand;
+                -fx-effect: dropshadow(gaussian, rgba(70,40,20,0.10), 18, 0.15, 0, 6);
+                """));
+
+        return button;
     }
 }
