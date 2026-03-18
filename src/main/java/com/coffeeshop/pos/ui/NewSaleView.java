@@ -14,10 +14,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -58,21 +57,53 @@ public class NewSaleView {
             return loginView.createScene();
         }
 
-        Label titleLabel = new Label("New Sale");
-        Label cashierLabel = new Label("Cashier: " + user.getUsername());
-
         loadProducts();
         refreshCart();
 
+        Label titleLabel = new Label("New Sale");
+        titleLabel.setStyle("""
+                -fx-text-fill: white;
+                -fx-font-size: 28px;
+                -fx-font-weight: bold;
+                """);
+
+        Label cashierLabel = new Label("Cashier: " + user.getUsername());
+        cashierLabel.setStyle("""
+                -fx-text-fill: rgba(255,255,255,0.9);
+                -fx-font-size: 14px;
+                -fx-font-weight: 600;
+                """);
+
+        VBox header = new VBox(6, titleLabel, cashierLabel);
+        CoffeeTheme.styleHeaderBar(header);
+
+        CoffeeTheme.styleListView(productListView);
+        CoffeeTheme.styleListView(cartListView);
+        productListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        cartListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
         quantityField.setPromptText("Quantity");
         amountPaidField.setPromptText("Amount Paid");
+        CoffeeTheme.styleTextField(quantityField);
+        CoffeeTheme.styleTextField(amountPaidField);
+
+        CoffeeTheme.styleSectionTitle(totalLabel);
+        CoffeeTheme.styleSectionTitle(changeLabel);
+        CoffeeTheme.styleStatusLabel(statusLabel);
 
         Button addToCartButton = new Button("Add to Cart");
         Button updateCartButton = new Button("Update Cart Item");
-        Button removeCartButton = new Button("Remove Cart Item");
+        Button removeCartButton = new Button("Remove");
         Button checkoutButton = new Button("Checkout");
         Button clearCartButton = new Button("Clear Cart");
         Button backButton = new Button("Back");
+
+        CoffeeTheme.stylePrimaryButton(addToCartButton);
+        CoffeeTheme.styleSecondaryButton(updateCartButton);
+        CoffeeTheme.styleDangerButton(removeCartButton);
+        CoffeeTheme.stylePrimaryButton(checkoutButton);
+        CoffeeTheme.styleGhostButton(clearCartButton);
+        CoffeeTheme.styleGhostButton(backButton);
 
         addToCartButton.setOnAction(event -> addSelectedProductToCart());
         updateCartButton.setOnAction(event -> updateSelectedCartItem());
@@ -81,58 +112,43 @@ public class NewSaleView {
         clearCartButton.setOnAction(event -> clearCart());
         backButton.setOnAction(event -> goBackToDashboard());
 
-        VBox leftPanel = new VBox(10,
-                new Label("Available Products"),
-                productListView
-        );
-        leftPanel.setPrefWidth(350);
+        Label productsTitle = new Label("Available Products");
+        CoffeeTheme.styleSectionTitle(productsTitle);
 
-        VBox rightPanel = new VBox(10,
-                new Label("Cart"),
-                cartListView,
-                totalLabel,
-                changeLabel
-        );
-        rightPanel.setPrefWidth(350);
+        VBox productsCard = CoffeeTheme.createCard(14);
+        productsCard.setPrefWidth(470);
+        productsCard.getChildren().addAll(productsTitle, productListView);
 
-        HBox centerPanel = new HBox(20, leftPanel, rightPanel);
+        Label cartTitle = new Label("Current Cart");
+        CoffeeTheme.styleSectionTitle(cartTitle);
+
+        VBox cartCard = CoffeeTheme.createCard(14);
+        cartCard.setPrefWidth(470);
+        cartCard.getChildren().addAll(cartTitle, cartListView, totalLabel, changeLabel);
+
+        HBox centerPanel = new HBox(24, productsCard, cartCard);
         centerPanel.setAlignment(Pos.CENTER);
 
-        HBox addControls = new HBox(10,
-                new Label("Quantity:"),
-                quantityField,
-                addToCartButton
-        );
-        addControls.setAlignment(Pos.CENTER);
+        Label qtyLabel = new Label("Quantity");
+        Label paidLabel = new Label("Amount Paid");
+        CoffeeTheme.styleBodyLabel(qtyLabel);
+        CoffeeTheme.styleBodyLabel(paidLabel);
 
-        HBox cartEditControls = new HBox(10,
-                updateCartButton,
-                removeCartButton
-        );
-        cartEditControls.setAlignment(Pos.CENTER);
+        VBox saleActions = CoffeeTheme.createCard(16);
 
-        HBox checkoutControls = new HBox(10,
-                new Label("Amount Paid:"),
-                amountPaidField,
-                checkoutButton,
-                clearCartButton,
-                backButton
-        );
-        checkoutControls.setAlignment(Pos.CENTER);
+        HBox row1 = new HBox(12, qtyLabel, quantityField, addToCartButton, updateCartButton, removeCartButton);
+        row1.setAlignment(Pos.CENTER_LEFT);
 
-        VBox topPanel = new VBox(8, titleLabel, cashierLabel);
-        topPanel.setAlignment(Pos.CENTER);
+        HBox row2 = new HBox(12, paidLabel, amountPaidField, checkoutButton, clearCartButton, backButton);
+        row2.setAlignment(Pos.CENTER_LEFT);
 
-        VBox bottomPanel = new VBox(10, addControls, cartEditControls, checkoutControls, statusLabel);
-        bottomPanel.setAlignment(Pos.CENTER);
+        saleActions.getChildren().addAll(row1, row2, statusLabel);
 
-        BorderPane root = new BorderPane();
-        root.setPadding(new Insets(20));
-        root.setTop(topPanel);
-        root.setCenter(centerPanel);
-        root.setBottom(bottomPanel);
+        VBox root = new VBox(24, header, centerPanel, saleActions);
+        root.setPadding(new Insets(26));
+        CoffeeTheme.styleRoot(root);
 
-        return new Scene(root, 1000, 650);
+        return new Scene(root, 1120, 760);
     }
 
     private void loadProducts() {
@@ -151,14 +167,14 @@ public class NewSaleView {
         Product selectedProduct = productListView.getSelectionModel().getSelectedItem();
 
         if (selectedProduct == null) {
-            statusLabel.setText("Please select a product.");
+            CoffeeTheme.setStatusError(statusLabel, "Please select a product.");
             return;
         }
 
         String quantityText = quantityField.getText().trim();
 
         if (quantityText.isEmpty()) {
-            statusLabel.setText("Please enter quantity.");
+            CoffeeTheme.setStatusError(statusLabel, "Please enter quantity.");
             return;
         }
 
@@ -166,12 +182,12 @@ public class NewSaleView {
         try {
             quantity = Integer.parseInt(quantityText);
         } catch (NumberFormatException e) {
-            statusLabel.setText("Quantity must be a number.");
+            CoffeeTheme.setStatusError(statusLabel, "Quantity must be a number.");
             return;
         }
 
         if (quantity <= 0) {
-            statusLabel.setText("Quantity must be greater than zero.");
+            CoffeeTheme.setStatusError(statusLabel, "Quantity must be greater than zero.");
             return;
         }
 
@@ -179,17 +195,15 @@ public class NewSaleView {
 
         if (!added) {
             int alreadyInCart = posService.getQuantityInCart(selectedProduct.getId());
-            statusLabel.setText(
-                    "Cannot add product. Stock: " +
-                            selectedProduct.getStockQty() +
-                            ", already in cart: " +
-                            alreadyInCart
+            CoffeeTheme.setStatusError(
+                    statusLabel,
+                    "Cannot add product. Stock: " + selectedProduct.getStockQty() + ", already in cart: " + alreadyInCart
             );
             return;
         }
 
         quantityField.clear();
-        statusLabel.setText("Added to cart: " + selectedProduct.getName());
+        CoffeeTheme.setStatusSuccess(statusLabel, "Added to cart: " + selectedProduct.getName());
         refreshCart();
     }
 
@@ -197,14 +211,14 @@ public class NewSaleView {
         CartItem selectedCartItem = cartListView.getSelectionModel().getSelectedItem();
 
         if (selectedCartItem == null) {
-            statusLabel.setText("Please select a cart item to update.");
+            CoffeeTheme.setStatusError(statusLabel, "Please select a cart item to update.");
             return;
         }
 
         String quantityText = quantityField.getText().trim();
 
         if (quantityText.isEmpty()) {
-            statusLabel.setText("Enter the new quantity in the quantity field.");
+            CoffeeTheme.setStatusError(statusLabel, "Enter the new quantity in the quantity field.");
             return;
         }
 
@@ -212,7 +226,7 @@ public class NewSaleView {
         try {
             newQuantity = Integer.parseInt(quantityText);
         } catch (NumberFormatException e) {
-            statusLabel.setText("Quantity must be a number.");
+            CoffeeTheme.setStatusError(statusLabel, "Quantity must be a number.");
             return;
         }
 
@@ -222,12 +236,12 @@ public class NewSaleView {
         );
 
         if (!updated) {
-            statusLabel.setText("Failed to update cart item.");
+            CoffeeTheme.setStatusError(statusLabel, "Failed to update cart item.");
             return;
         }
 
         quantityField.clear();
-        statusLabel.setText("Cart item updated.");
+        CoffeeTheme.setStatusSuccess(statusLabel, "Cart item updated.");
         refreshCart();
     }
 
@@ -235,18 +249,18 @@ public class NewSaleView {
         CartItem selectedCartItem = cartListView.getSelectionModel().getSelectedItem();
 
         if (selectedCartItem == null) {
-            statusLabel.setText("Please select a cart item to remove.");
+            CoffeeTheme.setStatusError(statusLabel, "Please select a cart item to remove.");
             return;
         }
 
         boolean removed = posService.removeFromCart(selectedCartItem.getProduct().getId());
 
         if (!removed) {
-            statusLabel.setText("Failed to remove cart item.");
+            CoffeeTheme.setStatusError(statusLabel, "Failed to remove cart item.");
             return;
         }
 
-        statusLabel.setText("Cart item removed.");
+        CoffeeTheme.setStatusSuccess(statusLabel, "Cart item removed.");
         refreshCart();
     }
 
@@ -254,19 +268,19 @@ public class NewSaleView {
         User user = SessionManager.getCurrentUser();
 
         if (user == null) {
-            statusLabel.setText("No active session. Please log in again.");
+            CoffeeTheme.setStatusError(statusLabel, "No active session. Please log in again.");
             return;
         }
 
         if (posService.isCartEmpty()) {
-            statusLabel.setText("Cart is empty. Cannot checkout.");
+            CoffeeTheme.setStatusError(statusLabel, "Cart is empty. Cannot checkout.");
             return;
         }
 
         String amountPaidText = amountPaidField.getText().trim();
 
         if (amountPaidText.isEmpty()) {
-            statusLabel.setText("Please enter amount paid.");
+            CoffeeTheme.setStatusError(statusLabel, "Please enter amount paid.");
             return;
         }
 
@@ -274,27 +288,27 @@ public class NewSaleView {
         try {
             amountPaid = Double.parseDouble(amountPaidText);
         } catch (NumberFormatException e) {
-            statusLabel.setText("Amount paid must be a number.");
+            CoffeeTheme.setStatusError(statusLabel, "Amount paid must be a number.");
             return;
         }
 
         double total = posService.calculateTotal();
 
         if (amountPaid < total) {
-            statusLabel.setText("Insufficient payment.");
+            CoffeeTheme.setStatusError(statusLabel, "Insufficient payment.");
             return;
         }
 
         int orderId = posService.checkout("TAKEAWAY", "CASH", amountPaid, user.getId());
 
         if (orderId == -1) {
-            statusLabel.setText("Failed to save order.");
+            CoffeeTheme.setStatusError(statusLabel, "Failed to save order.");
             return;
         }
 
         double change = amountPaid - total;
         changeLabel.setText("Change: $" + change);
-        statusLabel.setText("Order saved successfully. Order ID: " + orderId);
+        CoffeeTheme.setStatusSuccess(statusLabel, "Order saved successfully. Order ID: " + orderId);
 
         posService.clearCart();
         cartListView.getItems().clear();
@@ -310,7 +324,7 @@ public class NewSaleView {
         cartListView.getItems().clear();
         totalLabel.setText("Total: $0.0");
         changeLabel.setText("Change: $0.0");
-        statusLabel.setText("Cart cleared.");
+        CoffeeTheme.setStatusNeutral(statusLabel, "Cart cleared.");
     }
 
     private void goBackToDashboard() {
