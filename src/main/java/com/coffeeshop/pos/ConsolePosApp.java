@@ -9,6 +9,7 @@ import com.coffeeshop.pos.service.OrderService;
 import java.util.List;
 import java.util.Scanner;
 import java.time.LocalDate;
+import com.coffeeshop.pos.service.CategoryService;
 public class ConsolePosApp {
 
     private final UserService userService;
@@ -16,13 +17,14 @@ public class ConsolePosApp {
     private final PosService posService;
     private final Scanner scanner;
     private final OrderService orderService;
-
+    private final CategoryService categoryService;
     public ConsolePosApp() {
         this.userService = new UserService();
         this.productService = new ProductService();
         this.posService = new PosService();
-        this.scanner = new Scanner(System.in);
         this.orderService = new OrderService();
+        this.categoryService = new CategoryService();
+        this.scanner = new Scanner(System.in);
     }
 
     public void run() {
@@ -61,12 +63,14 @@ public class ConsolePosApp {
                 case 9 -> viewCustomDateSalesReport();
                 case 10 -> viewDateRangeSalesReport();
                 case 11 -> orderService.printTopSellingProductsReport();
-                case 12 -> addNewProduct();
-                case 13 -> updateProductPrice();
-                case 14 -> updateProductStock();
-                case 15 -> activateProduct();
-                case 16 -> deactivateProduct();
-                case 17 -> {
+                case 12 -> viewCategories();
+                case 13 -> addNewCategory();
+                case 14 -> addNewProduct();
+                case 15 -> updateProductPrice();
+                case 16 -> updateProductStock();
+                case 17 -> activateProduct();
+                case 18 -> deactivateProduct();
+                case 19 -> {
                     posService.clearCart();
                     System.out.println("Order cancelled.");
                     running = false;
@@ -111,12 +115,14 @@ public class ConsolePosApp {
             9. View sales report by date
             10. View sales report by date range
             11. View top-selling products report
-            12. Add new product
-            13. Update product price
-            14. Update product stock
-            15. Activate product
-            16. Deactivate product
-            17. Cancel order
+            12. View categories
+            13. Add new category
+            14. Add new product
+            15. Update product price
+            16. Update product stock
+            17. Activate product
+            18. Deactivate product
+            19. Cancel order
             """);
     }
 
@@ -286,12 +292,19 @@ public class ConsolePosApp {
         orderService.printSalesReportBetweenDates(startDate, endDate);
     }
     private void addNewProduct() {
+        categoryService.printCategories();
+
         System.out.print("Enter product name: ");
         scanner.nextLine();
         String name = scanner.nextLine();
 
         System.out.print("Enter category id: ");
         int categoryId = scanner.nextInt();
+
+        if (categoryService.getCategoryById(categoryId) == null) {
+            System.out.println("Invalid category id.");
+            return;
+        }
 
         System.out.print("Enter price: ");
         double price = scanner.nextDouble();
@@ -367,6 +380,22 @@ public class ConsolePosApp {
             System.out.println("Product deactivated successfully.");
         } else {
             System.out.println("Failed to deactivate product.");
+        }
+    }
+    private void viewCategories() {
+        categoryService.printCategories();
+    }
+    private void addNewCategory() {
+        System.out.print("Enter category name: ");
+        scanner.nextLine();
+        String name = scanner.nextLine();
+
+        boolean added = categoryService.addCategory(name);
+
+        if (added) {
+            System.out.println("Category added successfully.");
+        } else {
+            System.out.println("Failed to add category.");
         }
     }
 }
