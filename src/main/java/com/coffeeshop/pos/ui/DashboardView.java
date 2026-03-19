@@ -10,7 +10,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-
+import javafx.scene.control.ScrollPane;
 public class DashboardView {
 
     private final Stage stage;
