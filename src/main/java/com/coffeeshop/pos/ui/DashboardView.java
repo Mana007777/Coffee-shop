@@ -238,31 +238,27 @@ public class DashboardView {
     }
 
     private VBox buildBottomPanel(User user) {
-        Label sectionTitle = new Label("Quick Overview");
+
+        Label sectionTitle = new Label("کورتە زانیاری");
         CoffeeTheme.styleSectionTitle(sectionTitle);
 
         Label description = new Label(
                 SessionManager.isAdmin()
-                        ? "As an admin, you can manage operations, inventory, reports, and category setup."
-                        : "As a cashier, you can create new sales, review order history, and end your session."
+                        ? "تۆ دەتوانیت هەموو سیستەم بەڕێوەببەیت"
+                        : "تۆ دەتوانیت فرۆشتن بکەیت و مێژوو ببینیت"
         );
         description.setWrapText(true);
-        description.setStyle("""
-                -fx-text-fill: #6E5A4E;
-                -fx-font-size: 14px;
-                -fx-font-weight: 600;
-                """);
 
         HBox chips = new HBox(
                 12,
-                createInfoChip("User: " + user.getUsername()),
-                createInfoChip("Role: " + user.getRole()),
-                createInfoChip(SessionManager.isAdmin() ? "Full Access" : "Limited Access")
+                createInfoChip("بەکارهێنەر: " + user.getUsername()),
+                createInfoChip("ڕۆڵ: " + user.getRole()),
+                createInfoChip(SessionManager.isAdmin() ? "دەسەڵاتی تەواو" : "دەسەڵاتی سنووردار")
         );
-        chips.setAlignment(Pos.CENTER_LEFT);
 
         VBox panel = CoffeeTheme.createCard(14);
         panel.getChildren().addAll(sectionTitle, description, chips);
+
         return panel;
     }
 
@@ -365,7 +361,7 @@ public class DashboardView {
                 -fx-font-weight: 600;
                 """);
 
-        Label actionHint = new Label("Open module");
+        Label actionHint = new Label("کردنەوە");
         actionHint.setStyle("""
                 -fx-text-fill: #6F4E37;
                 -fx-font-size: 12px;
