@@ -50,92 +50,73 @@ public class DashboardView {
     }
 
     private VBox buildHeroSection(User user) {
-        Label eyebrowLabel = new Label("COFFEE SHOP POS");
-        eyebrowLabel.setStyle("""
-                -fx-text-fill: rgba(255,255,255,0.80);
-                -fx-font-size: 12px;
-                -fx-font-weight: 800;
-                -fx-letter-spacing: 1px;
-                """);
 
-        Label titleLabel = new Label("Dashboard");
+        Label eyebrowLabel = new Label("سیستەمی قاوەخانە");
+        eyebrowLabel.setStyle("""
+            -fx-text-fill: rgba(255,255,255,0.80);
+            -fx-font-size: 12px;
+            -fx-font-weight: 800;
+            """);
+
+        Label titleLabel = new Label("داشبۆرد");
         titleLabel.setStyle("""
-                -fx-text-fill: white;
-                -fx-font-size: 34px;
-                -fx-font-weight: bold;
-                """);
+            -fx-text-fill: white;
+            -fx-font-size: 34px;
+            -fx-font-weight: bold;
+            """);
 
         Label welcomeLabel = new Label(
-                "Welcome back, " + user.getUsername() + "  •  Role: " + user.getRole()
+                "بەخێربێیتەوە، " + user.getUsername() + "  •  ڕۆڵ: " + user.getRole()
         );
         welcomeLabel.setStyle("""
-                -fx-text-fill: rgba(255,255,255,0.92);
-                -fx-font-size: 15px;
-                -fx-font-weight: 600;
-                """);
+            -fx-text-fill: rgba(255,255,255,0.92);
+            -fx-font-size: 15px;
+            -fx-font-weight: 600;
+            """);
 
         Label subTextLabel = new Label(
-                "Access sales, reports, products, and categories from one clean control center."
+                "بەڕێوەبردنی فرۆشتن، کاڵا و ڕاپۆرتەکان لە یەک شوێن"
         );
         subTextLabel.setWrapText(true);
         subTextLabel.setStyle("""
-                -fx-text-fill: rgba(255,255,255,0.88);
-                -fx-font-size: 14px;
-                -fx-font-weight: 500;
-                """);
+            -fx-text-fill: rgba(255,255,255,0.88);
+            -fx-font-size: 14px;
+            -fx-font-weight: 500;
+            """);
 
         VBox leftSide = new VBox(8, eyebrowLabel, titleLabel, welcomeLabel, subTextLabel);
-        leftSide.setAlignment(Pos.CENTER_LEFT);
 
-        Label roleBadge = new Label(SessionManager.isAdmin() ? "ADMIN ACCESS" : "CASHIER ACCESS");
+        Label roleBadge = new Label(SessionManager.isAdmin() ? "ئەدمین" : "فرۆشیار");
         roleBadge.setStyle("""
-                -fx-text-fill: white;
-                -fx-font-size: 12px;
-                -fx-font-weight: 800;
-                -fx-padding: 10 16 10 16;
-                -fx-background-color: rgba(255,255,255,0.16);
-                -fx-background-radius: 999;
-                -fx-border-color: rgba(255,255,255,0.22);
-                -fx-border-radius: 999;
-                """);
+            -fx-text-fill: white;
+            -fx-font-size: 12px;
+            -fx-font-weight: 800;
+            -fx-padding: 10 16 10 16;
+            -fx-background-color: rgba(255,255,255,0.16);
+            -fx-background-radius: 999;
+            """);
 
-        Label quoteLabel = new Label("Run the shop smoothly, one order at a time.");
-        quoteLabel.setWrapText(true);
-        quoteLabel.setStyle("""
-                -fx-text-fill: rgba(255,255,255,0.82);
-                -fx-font-size: 13px;
-                -fx-font-style: italic;
-                -fx-font-weight: 600;
-                """);
-
-        VBox rightSide = new VBox(14, roleBadge, quoteLabel);
-        rightSide.setAlignment(Pos.TOP_RIGHT);
-        rightSide.setMaxWidth(260);
+        VBox rightSide = new VBox(roleBadge);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox topRow = new HBox(16, leftSide, spacer, rightSide);
-        topRow.setAlignment(Pos.TOP_LEFT);
 
         HBox metricsRow = new HBox(
                 14,
-                createHeroMetric("Orders", "Track every sale"),
-                createHeroMetric("Inventory", "Live stock control"),
-                createHeroMetric("Reports", "Business insights")
+                createHeroMetric("فرۆشتن", "هەموو داواکارییەکان"),
+                createHeroMetric("کۆگا", "کۆنتڕۆڵی ستۆک"),
+                createHeroMetric("ڕاپۆرت", "زانیاری کاروبار")
         );
-        metricsRow.setAlignment(Pos.CENTER_LEFT);
 
         VBox hero = new VBox(20, topRow, metricsRow);
         hero.setPadding(new Insets(26));
         hero.setStyle("""
-                -fx-background-color: linear-gradient(to right, #5C3B29, #7A523A, #9A6B46);
-                -fx-background-radius: 26;
-                -fx-border-color: rgba(255,255,255,0.10);
-                -fx-border-radius: 26;
-                -fx-border-width: 1;
-                -fx-effect: dropshadow(gaussian, rgba(60,35,20,0.22), 26, 0.22, 0, 10);
-                """);
+            -fx-background-color: linear-gradient(to right, #5C3B29, #7A523A, #9A6B46);
+            -fx-background-radius: 26;
+            -fx-effect: dropshadow(gaussian, rgba(60,35,20,0.22), 26, 0.22, 0, 10);
+            """);
 
         return hero;
     }
