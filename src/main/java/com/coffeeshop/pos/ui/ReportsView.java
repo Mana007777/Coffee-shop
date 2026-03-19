@@ -4,6 +4,7 @@ import com.coffeeshop.pos.config.SessionManager;
 import com.coffeeshop.pos.model.User;
 import com.coffeeshop.pos.service.OrderService;
 import javafx.geometry.Insets;
+import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -39,111 +40,238 @@ public class ReportsView {
         User user = SessionManager.getCurrentUser();
 
         if (user == null) {
-            LoginView loginView = new LoginView(stage);
-            return loginView.createScene();
+            return new LoginView(stage).createScene();
         }
 
-        Label titleLabel = new Label("Reports");
+        configureControls();
+
+        VBox header = buildHeader(user);
+        HBox overviewRow = buildOverviewRow();
+        VBox dateCard = buildSingleDateCard();
+        VBox rangeCard = buildDateRangeCard();
+        HBox quickActionsRow = buildQuickActionsRow();
+        VBox outputCard = buildOutputCard();
+
+        VBox root = new VBox(24, header, overviewRow, dateCard, rangeCard, quickActionsRow, outputCard);
+        root.setPadding(new Insets(26));
+        CoffeeTheme.styleRoot(root);
+        VBox.setVgrow(outputCard, Priority.ALWAYS);
+
+        return new Scene(root, 1160, 840);
+    }
+
+    private void configureControls() {
+        dateField.setPromptText("بەروار (YYYY-MM-DD)");
+        startDateField.setPromptText("بەرواری دەستپێک (YYYY-MM-DD)");
+        endDateField.setPromptText("بەرواری کۆتایی (YYYY-MM-DD)");
+
+        styleInput(dateField);
+        styleInput(startDateField);
+        styleInput(endDateField);
+
+        resultArea.setEditable(false);
+        resultArea.setWrapText(true);
+        resultArea.setPrefRowCount(18);
+        resultArea.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        CoffeeTheme.styleTextArea(resultArea);
+        resultArea.setStyle(resultArea.getStyle() + """
+                -fx-font-size: 14px;
+                -fx-alignment: top-right;
+                """);
+
+        CoffeeTheme.styleStatusLabel(statusLabel);
+        statusLabel.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+    }
+
+    private void styleInput(TextField field) {
+        CoffeeTheme.styleTextField(field);
+        field.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        field.setMaxWidth(Double.MAX_VALUE);
+        field.setPrefHeight(46);
+        field.setStyle(field.getStyle() + """
+                -fx-alignment: center-right;
+                """);
+    }
+
+    private VBox buildHeader(User user) {
+        Label titleLabel = new Label("ڕاپۆرتەکان");
         titleLabel.setStyle("""
                 -fx-text-fill: white;
-                -fx-font-size: 28px;
+                -fx-font-size: 30px;
                 -fx-font-weight: bold;
                 """);
 
-        Label userLabel = new Label("User: " + user.getUsername());
+        Label userLabel = new Label("بەکارهێنەر: " + user.getUsername());
         userLabel.setStyle("""
                 -fx-text-fill: rgba(255,255,255,0.92);
                 -fx-font-size: 14px;
                 -fx-font-weight: 600;
                 """);
 
-        VBox header = new VBox(6, titleLabel, userLabel);
+        Label helperLabel = new Label("بینینی ڕاپۆرتی ئەمڕۆ، بەروارێک، ماوەیەک و باشترین کاڵاکان");
+        helperLabel.setWrapText(true);
+        helperLabel.setStyle("""
+                -fx-text-fill: rgba(255,255,255,0.86);
+                -fx-font-size: 13px;
+                -fx-font-weight: 500;
+                """);
+
+        VBox header = new VBox(8, titleLabel, userLabel, helperLabel);
         CoffeeTheme.styleHeaderBar(header);
+        return header;
+    }
 
-        dateField.setPromptText("YYYY-MM-DD");
-        startDateField.setPromptText("Start Date (YYYY-MM-DD)");
-        endDateField.setPromptText("End Date (YYYY-MM-DD)");
+    private HBox buildOverviewRow() {
+        VBox stat1 = createInfoCard("ڕاپۆرتی ئەمڕۆ", "خێرا و ئامادە", "بینینی فرۆشتنی هەمان ڕۆژ");
+        VBox stat2 = createInfoCard("ڕاپۆرتی بەروار", "گەڕان بە بەروار", "دەتوانیت ڕۆژێکی دیاریکراو ببینیت");
+        VBox stat3 = createInfoCard("باشترین کاڵاکان", "زانیاری گرنگ", "بزانە کام کاڵا زیاتر دەفرۆشرێت");
 
-        CoffeeTheme.styleTextField(dateField);
-        CoffeeTheme.styleTextField(startDateField);
-        CoffeeTheme.styleTextField(endDateField);
+        HBox row = new HBox(18, stat1, stat2, stat3);
+        row.setAlignment(Pos.CENTER);
+        HBox.setHgrow(stat1, Priority.ALWAYS);
+        HBox.setHgrow(stat2, Priority.ALWAYS);
+        HBox.setHgrow(stat3, Priority.ALWAYS);
+        return row;
+    }
 
-        resultArea.setEditable(false);
-        resultArea.setWrapText(true);
-        resultArea.setPrefRowCount(18);
-        CoffeeTheme.styleTextArea(resultArea);
+    private VBox createInfoCard(String title, String value, String subtitle) {
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("""
+                -fx-text-fill: #7A675C;
+                -fx-font-size: 12px;
+                -fx-font-weight: 700;
+                """);
 
-        CoffeeTheme.styleStatusLabel(statusLabel);
+        Label valueLabel = new Label(value);
+        valueLabel.setWrapText(true);
+        valueLabel.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        valueLabel.setStyle("""
+                -fx-text-fill: #2E211B;
+                -fx-font-size: 19px;
+                -fx-font-weight: 800;
+                """);
 
-        Button todayReportButton = new Button("Today's Report");
-        Button dateReportButton = new Button("Report by Date");
-        Button rangeReportButton = new Button("Date Range Report");
-        Button topProductsButton = new Button("Top Products");
-        Button clearButton = new Button("Clear");
-        Button backButton = new Button("Back");
+        Label subtitleLabel = new Label(subtitle);
+        subtitleLabel.setWrapText(true);
+        subtitleLabel.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        subtitleLabel.setStyle("""
+                -fx-text-fill: #8B776C;
+                -fx-font-size: 12px;
+                -fx-font-weight: 600;
+                """);
+
+        VBox card = new VBox(8, titleLabel, valueLabel, subtitleLabel);
+        card.setPadding(new Insets(18));
+        card.setPrefHeight(120);
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.setStyle("""
+                -fx-background-color: #FFFDF9;
+                -fx-background-radius: 20;
+                -fx-border-color: #E6D6C8;
+                -fx-border-radius: 20;
+                -fx-border-width: 1;
+                -fx-effect: dropshadow(gaussian, rgba(70,40,20,0.08), 16, 0.15, 0, 5);
+                """);
+
+        return card;
+    }
+
+    private VBox buildSingleDateCard() {
+        Label title = new Label("ڕاپۆرت بە بەرواری دیاریکراو");
+        CoffeeTheme.styleSectionTitle(title);
+
+        Label helper = new Label("بەروارێک بنووسە بۆ بینینی زانیاریی فرۆشتن لەو ڕۆژەدا.");
+        helper.setWrapText(true);
+        helper.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        CoffeeTheme.styleBodyLabel(helper);
+
+        Button dateReportButton = new Button("پیشاندانی ڕاپۆرت");
+        CoffeeTheme.styleSecondaryButton(dateReportButton);
+        dateReportButton.setOnAction(event -> showDateReport());
+
+        HBox row = new HBox(12, dateField, dateReportButton);
+        row.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(dateField, Priority.ALWAYS);
+
+        VBox card = CoffeeTheme.createCard(14);
+        card.getChildren().addAll(title, helper, row);
+        return card;
+    }
+
+    private VBox buildDateRangeCard() {
+        Label title = new Label("ڕاپۆرت بۆ ماوەی بەروار");
+        CoffeeTheme.styleSectionTitle(title);
+
+        Label helper = new Label("بەرواری دەستپێک و کۆتایی دیاری بکە بۆ درووستکردنی ڕاپۆرتی ماوە.");
+        helper.setWrapText(true);
+        helper.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        CoffeeTheme.styleBodyLabel(helper);
+
+        Button rangeReportButton = new Button("پیشاندانی ڕاپۆرتی ماوە");
+        CoffeeTheme.styleSecondaryButton(rangeReportButton);
+        rangeReportButton.setOnAction(event -> showDateRangeReport());
+
+        HBox row = new HBox(12, startDateField, endDateField, rangeReportButton);
+        row.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(startDateField, Priority.ALWAYS);
+        HBox.setHgrow(endDateField, Priority.ALWAYS);
+
+        VBox card = CoffeeTheme.createCard(14);
+        card.getChildren().addAll(title, helper, row);
+        return card;
+    }
+
+    private HBox buildQuickActionsRow() {
+        Button todayReportButton = new Button("ڕاپۆرتی ئەمڕۆ");
+        Button topProductsButton = new Button("باشترین کاڵاکان");
+        Button clearButton = new Button("پاککردنەوە");
+        Button backButton = new Button("گەڕانەوە");
 
         CoffeeTheme.stylePrimaryButton(todayReportButton);
-        CoffeeTheme.styleSecondaryButton(dateReportButton);
-        CoffeeTheme.styleSecondaryButton(rangeReportButton);
         CoffeeTheme.stylePrimaryButton(topProductsButton);
         CoffeeTheme.styleGhostButton(clearButton);
         CoffeeTheme.styleGhostButton(backButton);
 
         todayReportButton.setOnAction(event -> showTodayReport());
-        dateReportButton.setOnAction(event -> showDateReport());
-        rangeReportButton.setOnAction(event -> showDateRangeReport());
         topProductsButton.setOnAction(event -> showTopProductsReport());
         clearButton.setOnAction(event -> clearOutput());
         backButton.setOnAction(event -> goBackToDashboard());
 
-        Label singleDateTitle = new Label("Report by Specific Date");
-        CoffeeTheme.styleSectionTitle(singleDateTitle);
+        HBox row = new HBox(12, todayReportButton, topProductsButton, clearButton, backButton);
+        row.setAlignment(Pos.CENTER_LEFT);
+        return row;
+    }
 
-        HBox dateRow = new HBox(12, dateField, dateReportButton);
-        dateRow.setAlignment(Pos.CENTER_LEFT);
-
-        VBox dateCard = CoffeeTheme.createCard(14);
-        dateCard.getChildren().addAll(singleDateTitle, dateRow);
-
-        Label rangeTitle = new Label("Report by Date Range");
-        CoffeeTheme.styleSectionTitle(rangeTitle);
-
-        HBox rangeRow = new HBox(12, startDateField, endDateField, rangeReportButton);
-        rangeRow.setAlignment(Pos.CENTER_LEFT);
-
-        VBox rangeCard = CoffeeTheme.createCard(14);
-        rangeCard.getChildren().addAll(rangeTitle, rangeRow);
-
-        HBox actionRow = new HBox(12, todayReportButton, topProductsButton, clearButton, backButton);
-        actionRow.setAlignment(Pos.CENTER_LEFT);
-
-        VBox outputCard = CoffeeTheme.createCard(14);
-        Label outputTitle = new Label("Report Output");
+    private VBox buildOutputCard() {
+        Label outputTitle = new Label("دەرئەنجامی ڕاپۆرت");
         CoffeeTheme.styleSectionTitle(outputTitle);
-        outputCard.getChildren().addAll(outputTitle, resultArea, statusLabel);
 
-        VBox root = new VBox(24, header, dateCard, rangeCard, actionRow, outputCard);
-        root.setPadding(new Insets(26));
-        CoffeeTheme.styleRoot(root);
+        Label helper = new Label("ئەنجامەکانی ڕاپۆرت لێرە دەردەکەون.");
+        helper.setWrapText(true);
+        helper.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        CoffeeTheme.styleBodyLabel(helper);
 
-        return new Scene(root, 1100, 780);
+        VBox card = CoffeeTheme.createCard(14);
+        VBox.setVgrow(resultArea, Priority.ALWAYS);
+        card.getChildren().addAll(outputTitle, helper, resultArea, statusLabel);
+        return card;
     }
 
     private void showTodayReport() {
         resultArea.setText(orderService.buildTodaySalesReport());
-        CoffeeTheme.setStatusSuccess(statusLabel, "Loaded today's report.");
+        CoffeeTheme.setStatusSuccess(statusLabel, "ڕاپۆرتی ئەمڕۆ بارکرا.");
     }
 
     private void showDateReport() {
         String date = dateField.getText().trim();
 
         if (!isValidDate(date)) {
-            CoffeeTheme.setStatusError(statusLabel, "Invalid date format. Use YYYY-MM-DD.");
+            CoffeeTheme.setStatusError(statusLabel, "شێوازی بەروار هەڵەیە. تکایە YYYY-MM-DD بەکاربهێنە.");
             return;
         }
 
         resultArea.setText(orderService.buildSalesReportByDate(date));
-        CoffeeTheme.setStatusSuccess(statusLabel, "Loaded report for " + date + ".");
+        CoffeeTheme.setStatusSuccess(statusLabel, "ڕاپۆرتی بەرواری " + date + " بارکرا.");
     }
 
     private void showDateRangeReport() {
@@ -151,22 +279,22 @@ public class ReportsView {
         String endDate = endDateField.getText().trim();
 
         if (!isValidDate(startDate) || !isValidDate(endDate)) {
-            CoffeeTheme.setStatusError(statusLabel, "Invalid date range. Use YYYY-MM-DD.");
+            CoffeeTheme.setStatusError(statusLabel, "بەرواری ماوە هەڵەیە. تکایە YYYY-MM-DD بەکاربهێنە.");
             return;
         }
 
         if (java.time.LocalDate.parse(startDate).isAfter(java.time.LocalDate.parse(endDate))) {
-            CoffeeTheme.setStatusError(statusLabel, "Start date cannot be after end date.");
+            CoffeeTheme.setStatusError(statusLabel, "بەرواری دەستپێک نابێت لە بەرواری کۆتایی دواوەتر بێت.");
             return;
         }
 
         resultArea.setText(orderService.buildSalesReportBetweenDates(startDate, endDate));
-        CoffeeTheme.setStatusSuccess(statusLabel, "Loaded date range report.");
+        CoffeeTheme.setStatusSuccess(statusLabel, "ڕاپۆرتی ماوە بارکرا.");
     }
 
     private void showTopProductsReport() {
         resultArea.setText(orderService.buildTopSellingProductsReport());
-        CoffeeTheme.setStatusSuccess(statusLabel, "Loaded top-selling products report.");
+        CoffeeTheme.setStatusSuccess(statusLabel, "ڕاپۆرتی باشترین کاڵاکان بارکرا.");
     }
 
     private void clearOutput() {
@@ -174,7 +302,7 @@ public class ReportsView {
         dateField.clear();
         startDateField.clear();
         endDateField.clear();
-        CoffeeTheme.setStatusNeutral(statusLabel, "Cleared.");
+        CoffeeTheme.setStatusNeutral(statusLabel, "خانەکان پاککرانەوە.");
     }
 
     private boolean isValidDate(String value) {
@@ -189,6 +317,6 @@ public class ReportsView {
     private void goBackToDashboard() {
         DashboardView dashboardView = new DashboardView(stage);
         stage.setScene(dashboardView.createScene());
-        stage.setTitle("Coffee POS - Dashboard");
+        stage.setTitle("داشبۆردی قاوەخانە");
     }
 }
