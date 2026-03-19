@@ -9,13 +9,10 @@ import com.coffeeshop.pos.service.ProductService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -42,8 +39,8 @@ public class NewSaleView {
 
         this.productListView = new ListView<>();
         this.cartListView = new ListView<>();
-        this.totalLabel = new Label("Total: $0.0");
-        this.changeLabel = new Label("Change: $0.0");
+        this.totalLabel = new Label("کۆی گشتی: 0 دینار");
+        this.changeLabel = new Label("گەڕاندنەوە: 0 دینار");
         this.quantityField = new TextField();
         this.amountPaidField = new TextField();
         this.statusLabel = new Label();
@@ -53,21 +50,21 @@ public class NewSaleView {
         User user = SessionManager.getCurrentUser();
 
         if (user == null) {
-            LoginView loginView = new LoginView(stage);
-            return loginView.createScene();
+            return new LoginView(stage).createScene();
         }
 
         loadProducts();
         refreshCart();
 
-        Label titleLabel = new Label("New Sale");
+        // Header
+        Label titleLabel = new Label("فرۆشتنی نوێ");
         titleLabel.setStyle("""
                 -fx-text-fill: white;
-                -fx-font-size: 28px;
+                -fx-font-size: 30px;
                 -fx-font-weight: bold;
                 """);
 
-        Label cashierLabel = new Label("Cashier: " + user.getUsername());
+        Label cashierLabel = new Label("فرۆشیار: " + user.getUsername());
         cashierLabel.setStyle("""
                 -fx-text-fill: rgba(255,255,255,0.9);
                 -fx-font-size: 14px;
@@ -77,13 +74,20 @@ public class NewSaleView {
         VBox header = new VBox(6, titleLabel, cashierLabel);
         CoffeeTheme.styleHeaderBar(header);
 
+        // Lists styling
         CoffeeTheme.styleListView(productListView);
         CoffeeTheme.styleListView(cartListView);
-        productListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        cartListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
-        quantityField.setPromptText("Quantity");
-        amountPaidField.setPromptText("Amount Paid");
+        productListView.setPrefHeight(500);
+        cartListView.setPrefHeight(500);
+
+        // Inputs
+        quantityField.setPromptText("ژمارە");
+        amountPaidField.setPromptText("پارەی دراو");
+
+        quantityField.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        amountPaidField.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+
         CoffeeTheme.styleTextField(quantityField);
         CoffeeTheme.styleTextField(amountPaidField);
 
@@ -91,12 +95,13 @@ public class NewSaleView {
         CoffeeTheme.styleSectionTitle(changeLabel);
         CoffeeTheme.styleStatusLabel(statusLabel);
 
-        Button addToCartButton = new Button("Add to Cart");
-        Button updateCartButton = new Button("Update Cart Item");
-        Button removeCartButton = new Button("Remove");
-        Button checkoutButton = new Button("Checkout");
-        Button clearCartButton = new Button("Clear Cart");
-        Button backButton = new Button("Back");
+        // Buttons
+        Button addToCartButton = new Button("زیادکردن بۆ سەبەت");
+        Button updateCartButton = new Button("نوێکردنەوە");
+        Button removeCartButton = new Button("لابردن");
+        Button checkoutButton = new Button("تەواوکردنی فرۆشتن");
+        Button clearCartButton = new Button("پاککردنەوە");
+        Button backButton = new Button("گەڕانەوە");
 
         CoffeeTheme.stylePrimaryButton(addToCartButton);
         CoffeeTheme.styleSecondaryButton(updateCartButton);
@@ -105,231 +110,161 @@ public class NewSaleView {
         CoffeeTheme.styleGhostButton(clearCartButton);
         CoffeeTheme.styleGhostButton(backButton);
 
-        addToCartButton.setOnAction(event -> addSelectedProductToCart());
-        updateCartButton.setOnAction(event -> updateSelectedCartItem());
-        removeCartButton.setOnAction(event -> removeSelectedCartItem());
-        checkoutButton.setOnAction(event -> handleCheckout());
-        clearCartButton.setOnAction(event -> clearCart());
-        backButton.setOnAction(event -> goBackToDashboard());
+        // Actions
+        addToCartButton.setOnAction(e -> addSelectedProductToCart());
+        updateCartButton.setOnAction(e -> updateSelectedCartItem());
+        removeCartButton.setOnAction(e -> removeSelectedCartItem());
+        checkoutButton.setOnAction(e -> handleCheckout());
+        clearCartButton.setOnAction(e -> clearCart());
+        backButton.setOnAction(e -> goBackToDashboard());
 
-        Label productsTitle = new Label("Available Products");
+        // Left: Products
+        Label productsTitle = new Label("کاڵاکان");
         CoffeeTheme.styleSectionTitle(productsTitle);
 
         VBox productsCard = CoffeeTheme.createCard(14);
-        productsCard.setPrefWidth(470);
+        productsCard.setPrefWidth(500);
         productsCard.getChildren().addAll(productsTitle, productListView);
 
-        Label cartTitle = new Label("Current Cart");
+        // Right: Cart
+        Label cartTitle = new Label("سەبەت");
         CoffeeTheme.styleSectionTitle(cartTitle);
 
         VBox cartCard = CoffeeTheme.createCard(14);
-        cartCard.setPrefWidth(470);
+        cartCard.setPrefWidth(500);
         cartCard.getChildren().addAll(cartTitle, cartListView, totalLabel, changeLabel);
 
         HBox centerPanel = new HBox(24, productsCard, cartCard);
         centerPanel.setAlignment(Pos.CENTER);
 
-        Label qtyLabel = new Label("Quantity");
-        Label paidLabel = new Label("Amount Paid");
+        // Bottom actions
+        Label qtyLabel = new Label("ژمارە");
+        Label paidLabel = new Label("پارەی دراو");
+
         CoffeeTheme.styleBodyLabel(qtyLabel);
         CoffeeTheme.styleBodyLabel(paidLabel);
 
-        VBox saleActions = CoffeeTheme.createCard(16);
+        VBox actions = CoffeeTheme.createCard(16);
 
         HBox row1 = new HBox(12, qtyLabel, quantityField, addToCartButton, updateCartButton, removeCartButton);
-        row1.setAlignment(Pos.CENTER_LEFT);
-
         HBox row2 = new HBox(12, paidLabel, amountPaidField, checkoutButton, clearCartButton, backButton);
-        row2.setAlignment(Pos.CENTER_LEFT);
 
-        saleActions.getChildren().addAll(row1, row2, statusLabel);
+        actions.getChildren().addAll(row1, row2, statusLabel);
 
-        VBox root = new VBox(24, header, centerPanel, saleActions);
+        VBox root = new VBox(24, header, centerPanel, actions);
         root.setPadding(new Insets(26));
         CoffeeTheme.styleRoot(root);
 
-        return new Scene(root, 1120, 760);
+        return new Scene(root, 1200, 780);
     }
 
     private void loadProducts() {
         List<Product> products = productService.getAvailableProducts();
-        ObservableList<Product> items = FXCollections.observableArrayList(products);
-        productListView.setItems(items);
+        productListView.setItems(FXCollections.observableArrayList(products));
     }
 
     private void refreshCart() {
-        ObservableList<CartItem> items = FXCollections.observableArrayList(posService.getCartItems());
-        cartListView.setItems(items);
-        totalLabel.setText("Total: $" + posService.calculateTotal());
+        cartListView.setItems(FXCollections.observableArrayList(posService.getCartItems()));
+        totalLabel.setText("کۆی گشتی: " + posService.calculateTotal() + " دینار");
     }
 
     private void addSelectedProductToCart() {
-        Product selectedProduct = productListView.getSelectionModel().getSelectedItem();
+        Product product = productListView.getSelectionModel().getSelectedItem();
 
-        if (selectedProduct == null) {
-            CoffeeTheme.setStatusError(statusLabel, "Please select a product.");
+        if (product == null) {
+            CoffeeTheme.setStatusError(statusLabel, "تکایە کاڵا هەڵبژێرە");
             return;
         }
 
-        String quantityText = quantityField.getText().trim();
-
-        if (quantityText.isEmpty()) {
-            CoffeeTheme.setStatusError(statusLabel, "Please enter quantity.");
-            return;
-        }
-
-        int quantity;
         try {
-            quantity = Integer.parseInt(quantityText);
-        } catch (NumberFormatException e) {
-            CoffeeTheme.setStatusError(statusLabel, "Quantity must be a number.");
-            return;
+            int qty = Integer.parseInt(quantityField.getText());
+            if (qty <= 0) throw new Exception();
+
+            if (!posService.addToCart(product, qty)) {
+                CoffeeTheme.setStatusError(statusLabel, "کۆگا بەس نییە");
+                return;
+            }
+
+            CoffeeTheme.setStatusSuccess(statusLabel, "زیادکرا بۆ سەبەت");
+            quantityField.clear();
+            refreshCart();
+
+        } catch (Exception e) {
+            CoffeeTheme.setStatusError(statusLabel, "ژمارە دروست بنووسە");
         }
-
-        if (quantity <= 0) {
-            CoffeeTheme.setStatusError(statusLabel, "Quantity must be greater than zero.");
-            return;
-        }
-
-        boolean added = posService.addToCart(selectedProduct, quantity);
-
-        if (!added) {
-            int alreadyInCart = posService.getQuantityInCart(selectedProduct.getId());
-            CoffeeTheme.setStatusError(
-                    statusLabel,
-                    "Cannot add product. Stock: " + selectedProduct.getStockQty() + ", already in cart: " + alreadyInCart
-            );
-            return;
-        }
-
-        quantityField.clear();
-        CoffeeTheme.setStatusSuccess(statusLabel, "Added to cart: " + selectedProduct.getName());
-        refreshCart();
     }
 
     private void updateSelectedCartItem() {
-        CartItem selectedCartItem = cartListView.getSelectionModel().getSelectedItem();
+        CartItem item = cartListView.getSelectionModel().getSelectedItem();
 
-        if (selectedCartItem == null) {
-            CoffeeTheme.setStatusError(statusLabel, "Please select a cart item to update.");
+        if (item == null) {
+            CoffeeTheme.setStatusError(statusLabel, "شتێک هەڵبژێرە");
             return;
         }
 
-        String quantityText = quantityField.getText().trim();
-
-        if (quantityText.isEmpty()) {
-            CoffeeTheme.setStatusError(statusLabel, "Enter the new quantity in the quantity field.");
-            return;
-        }
-
-        int newQuantity;
         try {
-            newQuantity = Integer.parseInt(quantityText);
-        } catch (NumberFormatException e) {
-            CoffeeTheme.setStatusError(statusLabel, "Quantity must be a number.");
-            return;
+            int qty = Integer.parseInt(quantityField.getText());
+            posService.updateCartItemQuantity(item.getProduct().getId(), qty);
+            CoffeeTheme.setStatusSuccess(statusLabel, "نوێکرایەوە");
+            refreshCart();
+        } catch (Exception e) {
+            CoffeeTheme.setStatusError(statusLabel, "ژمارە هەڵەیە");
         }
-
-        boolean updated = posService.updateCartItemQuantity(
-                selectedCartItem.getProduct().getId(),
-                newQuantity
-        );
-
-        if (!updated) {
-            CoffeeTheme.setStatusError(statusLabel, "Failed to update cart item.");
-            return;
-        }
-
-        quantityField.clear();
-        CoffeeTheme.setStatusSuccess(statusLabel, "Cart item updated.");
-        refreshCart();
     }
 
     private void removeSelectedCartItem() {
-        CartItem selectedCartItem = cartListView.getSelectionModel().getSelectedItem();
+        CartItem item = cartListView.getSelectionModel().getSelectedItem();
 
-        if (selectedCartItem == null) {
-            CoffeeTheme.setStatusError(statusLabel, "Please select a cart item to remove.");
+        if (item == null) {
+            CoffeeTheme.setStatusError(statusLabel, "هەڵبژاردن بکە");
             return;
         }
 
-        boolean removed = posService.removeFromCart(selectedCartItem.getProduct().getId());
-
-        if (!removed) {
-            CoffeeTheme.setStatusError(statusLabel, "Failed to remove cart item.");
-            return;
-        }
-
-        CoffeeTheme.setStatusSuccess(statusLabel, "Cart item removed.");
+        posService.removeFromCart(item.getProduct().getId());
+        CoffeeTheme.setStatusSuccess(statusLabel, "لابرا");
         refreshCart();
     }
 
     private void handleCheckout() {
-        User user = SessionManager.getCurrentUser();
-
-        if (user == null) {
-            CoffeeTheme.setStatusError(statusLabel, "No active session. Please log in again.");
-            return;
-        }
-
         if (posService.isCartEmpty()) {
-            CoffeeTheme.setStatusError(statusLabel, "Cart is empty. Cannot checkout.");
+            CoffeeTheme.setStatusError(statusLabel, "سەبەت بەتاڵە");
             return;
         }
 
-        String amountPaidText = amountPaidField.getText().trim();
-
-        if (amountPaidText.isEmpty()) {
-            CoffeeTheme.setStatusError(statusLabel, "Please enter amount paid.");
-            return;
-        }
-
-        double amountPaid;
         try {
-            amountPaid = Double.parseDouble(amountPaidText);
-        } catch (NumberFormatException e) {
-            CoffeeTheme.setStatusError(statusLabel, "Amount paid must be a number.");
-            return;
+            double paid = Double.parseDouble(amountPaidField.getText());
+            double total = posService.calculateTotal();
+
+            if (paid < total) {
+                CoffeeTheme.setStatusError(statusLabel, "پارە کەمە");
+                return;
+            }
+
+            int orderId = posService.checkout("TAKEAWAY", "CASH", paid,
+                    SessionManager.getCurrentUser().getId());
+
+            double change = paid - total;
+            changeLabel.setText("گەڕاندنەوە: " + change + " دینار");
+
+            CoffeeTheme.setStatusSuccess(statusLabel, "سەرکەوتوو بوو ✔ ID: " + orderId);
+
+            clearCart();
+
+        } catch (Exception e) {
+            CoffeeTheme.setStatusError(statusLabel, "پارەی دراو دروست نییە");
         }
-
-        double total = posService.calculateTotal();
-
-        if (amountPaid < total) {
-            CoffeeTheme.setStatusError(statusLabel, "Insufficient payment.");
-            return;
-        }
-
-        int orderId = posService.checkout("TAKEAWAY", "CASH", amountPaid, user.getId());
-
-        if (orderId == -1) {
-            CoffeeTheme.setStatusError(statusLabel, "Failed to save order.");
-            return;
-        }
-
-        double change = amountPaid - total;
-        changeLabel.setText("Change: $" + change);
-        CoffeeTheme.setStatusSuccess(statusLabel, "Order saved successfully. Order ID: " + orderId);
-
-        posService.clearCart();
-        cartListView.getItems().clear();
-        totalLabel.setText("Total: $0.0");
-        amountPaidField.clear();
-        quantityField.clear();
-
-        loadProducts();
     }
 
     private void clearCart() {
         posService.clearCart();
         cartListView.getItems().clear();
-        totalLabel.setText("Total: $0.0");
-        changeLabel.setText("Change: $0.0");
-        CoffeeTheme.setStatusNeutral(statusLabel, "Cart cleared.");
+        totalLabel.setText("کۆی گشتی: 0 دینار");
+        changeLabel.setText("گەڕاندنەوە: 0 دینار");
+        amountPaidField.clear();
+        quantityField.clear();
     }
 
     private void goBackToDashboard() {
-        DashboardView dashboardView = new DashboardView(stage);
-        stage.setScene(dashboardView.createScene());
-        stage.setTitle("Coffee POS - Dashboard");
+        stage.setScene(new DashboardView(stage).createScene());
     }
 }
