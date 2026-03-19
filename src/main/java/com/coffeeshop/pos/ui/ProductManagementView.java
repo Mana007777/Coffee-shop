@@ -9,6 +9,7 @@ import com.coffeeshop.pos.service.ProductService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -17,6 +18,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -64,47 +66,15 @@ public class ProductManagementView {
         }
 
         if (!"ADMIN".equalsIgnoreCase(user.getRole())) {
-            VBox deniedRoot = CoffeeTheme.createCard(14);
-            deniedRoot.setAlignment(Pos.CENTER);
-            deniedRoot.setPadding(new Insets(30));
-
-            Label deniedTitle = new Label("Access Denied");
-            CoffeeTheme.styleSectionTitle(deniedTitle);
-
-            Label deniedText = new Label("Only admins can access Product Management.");
-            CoffeeTheme.styleBodyLabel(deniedText);
-
-            Button backButton = new Button("Back");
-            CoffeeTheme.styleGhostButton(backButton);
-            backButton.setOnAction(e -> goBackToDashboard());
-
-            deniedRoot.getChildren().addAll(deniedTitle, deniedText, backButton);
-            CoffeeTheme.styleRoot(deniedRoot);
-
-            return new Scene(deniedRoot, 520, 280);
+            return createAccessDeniedScene();
         }
 
         configureControls();
         loadProducts();
         loadCategories();
 
-        Label titleLabel = new Label("Product Management");
-        titleLabel.setStyle("""
-                -fx-text-fill: white;
-                -fx-font-size: 28px;
-                -fx-font-weight: bold;
-                """);
-
-        Label userLabel = new Label("Admin: " + user.getUsername());
-        userLabel.setStyle("""
-                -fx-text-fill: rgba(255,255,255,0.92);
-                -fx-font-size: 14px;
-                -fx-font-weight: 600;
-                """);
-
-        VBox header = new VBox(6, titleLabel, userLabel);
-        CoffeeTheme.styleHeaderBar(header);
-
+        VBox header = buildHeader(user);
+        HBox overviewRow = buildOverviewRow();
         VBox productsPanel = buildProductsPanel();
         VBox managementPanel = buildManagementPanel();
         VBox footer = buildFooter();
@@ -114,39 +84,143 @@ public class ProductManagementView {
         HBox.setHgrow(productsPanel, Priority.ALWAYS);
         HBox.setHgrow(managementPanel, Priority.ALWAYS);
 
-        VBox root = new VBox(24, header, centerPanel, footer);
+        VBox root = new VBox(24, header, overviewRow, centerPanel, footer);
         root.setPadding(new Insets(26));
         CoffeeTheme.styleRoot(root);
         VBox.setVgrow(centerPanel, Priority.ALWAYS);
 
-        return new Scene(root, 1240, 820);
+        return new Scene(root, 1280, 860);
+    }
+
+    private Scene createAccessDeniedScene() {
+        Label deniedTitle = new Label("دەستگەیشتن ڕێگەپێنەدراوە");
+        CoffeeTheme.styleSectionTitle(deniedTitle);
+
+        Label deniedText = new Label("تەنها ئەدمین دەتوانێت بەشی بەڕێوەبردنی کاڵاکان بەکاربهێنێت.");
+        deniedText.setWrapText(true);
+        deniedText.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        CoffeeTheme.styleBodyLabel(deniedText);
+
+        Button backButton = new Button("گەڕانەوە");
+        CoffeeTheme.styleGhostButton(backButton);
+        backButton.setOnAction(e -> goBackToDashboard());
+
+        VBox deniedRoot = CoffeeTheme.createCard(16);
+        deniedRoot.setAlignment(Pos.CENTER);
+        deniedRoot.setPadding(new Insets(32));
+        deniedRoot.setMaxWidth(520);
+        deniedRoot.getChildren().addAll(deniedTitle, deniedText, backButton);
+
+        VBox wrapper = new VBox(deniedRoot);
+        wrapper.setAlignment(Pos.CENTER);
+        wrapper.setPadding(new Insets(30));
+        CoffeeTheme.styleRoot(wrapper);
+
+        return new Scene(wrapper, 700, 360);
+    }
+
+    private VBox buildHeader(User user) {
+        Label titleLabel = new Label("بەڕێوەبردنی کاڵاکان");
+        titleLabel.setStyle("""
+                -fx-text-fill: white;
+                -fx-font-size: 30px;
+                -fx-font-weight: bold;
+                """);
+
+        Label userLabel = new Label("ئەدمین: " + user.getUsername());
+        userLabel.setStyle("""
+                -fx-text-fill: rgba(255,255,255,0.92);
+                -fx-font-size: 14px;
+                -fx-font-weight: 600;
+                """);
+
+        Label helperLabel = new Label("زیادکردن، دەستکاریکردن، چالاککردن و کۆنتڕۆڵی کۆگا لە یەک شوێن");
+        helperLabel.setWrapText(true);
+        helperLabel.setStyle("""
+                -fx-text-fill: rgba(255,255,255,0.84);
+                -fx-font-size: 13px;
+                -fx-font-weight: 500;
+                """);
+
+        VBox header = new VBox(8, titleLabel, userLabel, helperLabel);
+        CoffeeTheme.styleHeaderBar(header);
+        return header;
+    }
+
+    private HBox buildOverviewRow() {
+        VBox stat1 = createInfoCard("کاڵاکان", "بینینی هەموو کاڵاکان", "هەڵبژاردنی کاڵا بۆ دەستکاری");
+        VBox stat2 = createInfoCard("پۆلەکان", "ڕێکخستنی جۆری کاڵا", "پێویستە بۆ زیادکردنی کاڵای نوێ");
+        VBox stat3 = createInfoCard("کۆگا و نرخ", "نوێکردنەوەی خێرا", "بۆ کارکردنی ڕۆژانەی قاوەخانە");
+
+        HBox row = new HBox(18, stat1, stat2, stat3);
+        row.setAlignment(Pos.CENTER);
+        HBox.setHgrow(stat1, Priority.ALWAYS);
+        HBox.setHgrow(stat2, Priority.ALWAYS);
+        HBox.setHgrow(stat3, Priority.ALWAYS);
+        return row;
+    }
+
+    private VBox createInfoCard(String title, String value, String subtitle) {
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("""
+                -fx-text-fill: #7A675C;
+                -fx-font-size: 12px;
+                -fx-font-weight: 700;
+                """);
+
+        Label valueLabel = new Label(value);
+        valueLabel.setWrapText(true);
+        valueLabel.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        valueLabel.setStyle("""
+                -fx-text-fill: #2E211B;
+                -fx-font-size: 19px;
+                -fx-font-weight: 800;
+                """);
+
+        Label subtitleLabel = new Label(subtitle);
+        subtitleLabel.setWrapText(true);
+        subtitleLabel.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        subtitleLabel.setStyle("""
+                -fx-text-fill: #8B776C;
+                -fx-font-size: 12px;
+                -fx-font-weight: 600;
+                """);
+
+        VBox card = new VBox(8, titleLabel, valueLabel, subtitleLabel);
+        card.setPadding(new Insets(18));
+        card.setPrefHeight(120);
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.setStyle("""
+                -fx-background-color: #FFFDF9;
+                -fx-background-radius: 20;
+                -fx-border-color: #E6D6C8;
+                -fx-border-radius: 20;
+                -fx-border-width: 1;
+                -fx-effect: dropshadow(gaussian, rgba(70,40,20,0.08), 16, 0.15, 0, 5);
+                """);
+
+        return card;
     }
 
     private void configureControls() {
-        nameField.setPromptText("Product Name");
-        priceField.setPromptText("Price");
-        stockField.setPromptText("Stock Quantity");
-        newPriceField.setPromptText("New Price");
-        newStockField.setPromptText("New Stock Quantity");
+        nameField.setPromptText("ناوی کاڵا");
+        priceField.setPromptText("نرخ بە دینار");
+        stockField.setPromptText("ژمارەی کۆگا");
+        newPriceField.setPromptText("نرخی نوێ بە دینار");
+        newStockField.setPromptText("کۆگای نوێ");
 
-        CoffeeTheme.styleTextField(nameField);
-        CoffeeTheme.styleTextField(priceField);
-        CoffeeTheme.styleTextField(stockField);
-        CoffeeTheme.styleTextField(newPriceField);
-        CoffeeTheme.styleTextField(newStockField);
-
-        nameField.setMaxWidth(Double.MAX_VALUE);
-        priceField.setMaxWidth(Double.MAX_VALUE);
-        stockField.setMaxWidth(Double.MAX_VALUE);
-        newPriceField.setMaxWidth(Double.MAX_VALUE);
-        newStockField.setMaxWidth(Double.MAX_VALUE);
+        styleInput(nameField);
+        styleInput(priceField);
+        styleInput(stockField);
+        styleInput(newPriceField);
+        styleInput(newStockField);
 
         CoffeeTheme.styleListView(productListView);
         CoffeeTheme.styleListView(categoryListView);
         CoffeeTheme.styleStatusLabel(statusLabel);
 
-        productListView.setPrefHeight(580);
-        productListView.setMinHeight(500);
+        productListView.setPrefHeight(600);
+        productListView.setMinHeight(520);
         productListView.setMaxWidth(Double.MAX_VALUE);
 
         categoryListView.setPrefHeight(220);
@@ -163,40 +237,54 @@ public class ProductManagementView {
         });
     }
 
+    private void styleInput(TextField field) {
+        CoffeeTheme.styleTextField(field);
+        field.setMaxWidth(Double.MAX_VALUE);
+        field.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        field.setStyle(field.getStyle() + """
+                -fx-alignment: center-right;
+                """);
+    }
+
     private VBox buildProductsPanel() {
-        Label productsLabel = new Label("Products");
+        Label productsLabel = new Label("کاڵاکان");
         CoffeeTheme.styleSectionTitle(productsLabel);
 
-        Label helperLabel = new Label("Select a product to edit its price, stock, or active status.");
+        Label helperLabel = new Label("کاڵایەک هەڵبژێرە بۆ دەستکاری کردنی نرخ، کۆگا یان دۆخی چالاک/ناچالاک.");
+        helperLabel.setWrapText(true);
+        helperLabel.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         CoffeeTheme.styleBodyLabel(helperLabel);
 
         VBox panel = CoffeeTheme.createCard(14);
-        panel.setPrefWidth(700);
-        panel.setMinWidth(640);
-        panel.getChildren().addAll(productsLabel, helperLabel, productListView);
+        panel.setPrefWidth(760);
+        panel.setMinWidth(700);
 
         VBox.setVgrow(productListView, Priority.ALWAYS);
+        panel.getChildren().addAll(productsLabel, helperLabel, productListView);
+
         return panel;
     }
 
     private VBox buildManagementPanel() {
-        Label categoriesLabel = new Label("Categories");
+        Label categoriesLabel = new Label("پۆلەکان");
         CoffeeTheme.styleSectionTitle(categoriesLabel);
 
-        Label addProductLabel = new Label("Add New Product");
+        Label addProductLabel = new Label("زیادکردنی کاڵای نوێ");
         CoffeeTheme.styleSectionTitle(addProductLabel);
 
-        Label editProductLabel = new Label("Edit Selected Product");
+        Label editProductLabel = new Label("دەستکاری کاڵا");
         CoffeeTheme.styleSectionTitle(editProductLabel);
 
-        Label addHintLabel = new Label("Pick a category first, then enter product details.");
+        Label addHintLabel = new Label("سەرەتا پۆل هەڵبژێرە، پاشان زانیارییەکانی کاڵا بنووسە.");
+        addHintLabel.setWrapText(true);
+        addHintLabel.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         CoffeeTheme.styleBodyLabel(addHintLabel);
 
-        Button addProductButton = new Button("Add Product");
-        Button updatePriceButton = new Button("Update Price");
-        Button updateStockButton = new Button("Update Stock");
-        Button activateButton = new Button("Activate Product");
-        Button deactivateButton = new Button("Deactivate Product");
+        Button addProductButton = new Button("زیادکردن");
+        Button updatePriceButton = new Button("نوێکردنەوەی نرخ");
+        Button updateStockButton = new Button("نوێکردنەوەی کۆگا");
+        Button activateButton = new Button("چالاککردن");
+        Button deactivateButton = new Button("ناچالاککردن");
 
         CoffeeTheme.stylePrimaryButton(addProductButton);
         CoffeeTheme.styleSecondaryButton(updatePriceButton);
@@ -221,8 +309,8 @@ public class ProductManagementView {
         HBox.setHgrow(deactivateButton, Priority.ALWAYS);
 
         VBox panel = CoffeeTheme.createCard(14);
-        panel.setPrefWidth(460);
-        panel.setMinWidth(420);
+        panel.setPrefWidth(470);
+        panel.setMinWidth(440);
 
         panel.getChildren().addAll(
                 categoriesLabel,
@@ -245,9 +333,9 @@ public class ProductManagementView {
     }
 
     private VBox buildFooter() {
-        Button refreshButton = new Button("Refresh");
-        Button clearButton = new Button("Clear Fields");
-        Button backButton = new Button("Back");
+        Button refreshButton = new Button("نوێکردنەوە");
+        Button clearButton = new Button("پاککردنەوە");
+        Button backButton = new Button("گەڕانەوە");
 
         CoffeeTheme.styleGhostButton(refreshButton);
         CoffeeTheme.styleGhostButton(clearButton);
@@ -257,7 +345,10 @@ public class ProductManagementView {
         clearButton.setOnAction(event -> clearFields());
         backButton.setOnAction(event -> goBackToDashboard());
 
-        HBox buttons = new HBox(12, refreshButton, clearButton, backButton);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox buttons = new HBox(12, refreshButton, clearButton, spacer, backButton);
         buttons.setAlignment(Pos.CENTER_LEFT);
 
         VBox footer = CoffeeTheme.createCard(12);
@@ -284,12 +375,12 @@ public class ProductManagementView {
         Category selectedCategory = categoryListView.getSelectionModel().getSelectedItem();
 
         if (selectedCategory == null) {
-            CoffeeTheme.setStatusError(statusLabel, "Select a category first.");
+            CoffeeTheme.setStatusError(statusLabel, "تکایە سەرەتا پۆل هەڵبژێرە.");
             return;
         }
 
         if (name.isEmpty()) {
-            CoffeeTheme.setStatusError(statusLabel, "Enter a product name.");
+            CoffeeTheme.setStatusError(statusLabel, "تکایە ناوی کاڵا بنووسە.");
             return;
         }
 
@@ -300,28 +391,28 @@ public class ProductManagementView {
             price = Double.parseDouble(priceText);
             stockQty = Integer.parseInt(stockText);
         } catch (NumberFormatException e) {
-            CoffeeTheme.setStatusError(statusLabel, "Price must be a number and stock must be a whole number.");
+            CoffeeTheme.setStatusError(statusLabel, "نرخ و کۆگا دەبێت بە ژمارەی دروست بنووسرێن.");
             return;
         }
 
         if (price < 0) {
-            CoffeeTheme.setStatusError(statusLabel, "Price cannot be negative.");
+            CoffeeTheme.setStatusError(statusLabel, "نرخ ناتوانێت منفی بێت.");
             return;
         }
 
         if (stockQty < 0) {
-            CoffeeTheme.setStatusError(statusLabel, "Stock cannot be negative.");
+            CoffeeTheme.setStatusError(statusLabel, "کۆگا ناتوانێت منفی بێت.");
             return;
         }
 
         boolean added = productService.addProduct(name, selectedCategory.getId(), price, stockQty);
 
         if (added) {
-            CoffeeTheme.setStatusSuccess(statusLabel, "Product added successfully.");
+            CoffeeTheme.setStatusSuccess(statusLabel, "کاڵا بە سەرکەوتوویی زیادکرا.");
             clearAddProductFields();
             loadProducts();
         } else {
-            CoffeeTheme.setStatusError(statusLabel, "Failed to add product.");
+            CoffeeTheme.setStatusError(statusLabel, "هەڵەیەک لە زیادکردنی کاڵا ڕوویدا.");
         }
     }
 
@@ -329,7 +420,7 @@ public class ProductManagementView {
         Product selectedProduct = productListView.getSelectionModel().getSelectedItem();
 
         if (selectedProduct == null) {
-            CoffeeTheme.setStatusError(statusLabel, "Select a product to update.");
+            CoffeeTheme.setStatusError(statusLabel, "تکایە کاڵایەک هەڵبژێرە.");
             return;
         }
 
@@ -339,22 +430,22 @@ public class ProductManagementView {
         try {
             newPrice = Double.parseDouble(newPriceText);
         } catch (NumberFormatException e) {
-            CoffeeTheme.setStatusError(statusLabel, "Enter a valid new price.");
+            CoffeeTheme.setStatusError(statusLabel, "تکایە نرخی نوێ بە شێوەی دروست بنووسە.");
             return;
         }
 
         if (newPrice < 0) {
-            CoffeeTheme.setStatusError(statusLabel, "Price cannot be negative.");
+            CoffeeTheme.setStatusError(statusLabel, "نرخ ناتوانێت منفی بێت.");
             return;
         }
 
         boolean updated = productService.updateProductPrice(selectedProduct.getId(), newPrice);
 
         if (updated) {
-            CoffeeTheme.setStatusSuccess(statusLabel, "Product price updated.");
+            CoffeeTheme.setStatusSuccess(statusLabel, "نرخی کاڵا نوێکرایەوە.");
             loadProducts();
         } else {
-            CoffeeTheme.setStatusError(statusLabel, "Failed to update product price.");
+            CoffeeTheme.setStatusError(statusLabel, "هەڵەیەک لە نوێکردنەوەی نرخ ڕوویدا.");
         }
     }
 
@@ -362,7 +453,7 @@ public class ProductManagementView {
         Product selectedProduct = productListView.getSelectionModel().getSelectedItem();
 
         if (selectedProduct == null) {
-            CoffeeTheme.setStatusError(statusLabel, "Select a product to update.");
+            CoffeeTheme.setStatusError(statusLabel, "تکایە کاڵایەک هەڵبژێرە.");
             return;
         }
 
@@ -372,22 +463,22 @@ public class ProductManagementView {
         try {
             newStock = Integer.parseInt(newStockText);
         } catch (NumberFormatException e) {
-            CoffeeTheme.setStatusError(statusLabel, "Enter a valid stock quantity.");
+            CoffeeTheme.setStatusError(statusLabel, "تکایە کۆگای نوێ بە شێوەی دروست بنووسە.");
             return;
         }
 
         if (newStock < 0) {
-            CoffeeTheme.setStatusError(statusLabel, "Stock cannot be negative.");
+            CoffeeTheme.setStatusError(statusLabel, "کۆگا ناتوانێت منفی بێت.");
             return;
         }
 
         boolean updated = productService.updateProductStock(selectedProduct.getId(), newStock);
 
         if (updated) {
-            CoffeeTheme.setStatusSuccess(statusLabel, "Product stock updated.");
+            CoffeeTheme.setStatusSuccess(statusLabel, "کۆگای کاڵا نوێکرایەوە.");
             loadProducts();
         } else {
-            CoffeeTheme.setStatusError(statusLabel, "Failed to update product stock.");
+            CoffeeTheme.setStatusError(statusLabel, "هەڵەیەک لە نوێکردنەوەی کۆگا ڕوویدا.");
         }
     }
 
@@ -395,17 +486,17 @@ public class ProductManagementView {
         Product selectedProduct = productListView.getSelectionModel().getSelectedItem();
 
         if (selectedProduct == null) {
-            CoffeeTheme.setStatusError(statusLabel, "Select a product first.");
+            CoffeeTheme.setStatusError(statusLabel, "تکایە کاڵایەک هەڵبژێرە.");
             return;
         }
 
         boolean updated = productService.activateProduct(selectedProduct.getId());
 
         if (updated) {
-            CoffeeTheme.setStatusSuccess(statusLabel, "Product activated.");
+            CoffeeTheme.setStatusSuccess(statusLabel, "کاڵا چالاککرا.");
             loadProducts();
         } else {
-            CoffeeTheme.setStatusError(statusLabel, "Failed to activate product.");
+            CoffeeTheme.setStatusError(statusLabel, "هەڵەیەک لە چالاککردنی کاڵا ڕوویدا.");
         }
     }
 
@@ -413,24 +504,24 @@ public class ProductManagementView {
         Product selectedProduct = productListView.getSelectionModel().getSelectedItem();
 
         if (selectedProduct == null) {
-            CoffeeTheme.setStatusError(statusLabel, "Select a product first.");
+            CoffeeTheme.setStatusError(statusLabel, "تکایە کاڵایەک هەڵبژێرە.");
             return;
         }
 
         boolean updated = productService.deactivateProduct(selectedProduct.getId());
 
         if (updated) {
-            CoffeeTheme.setStatusSuccess(statusLabel, "Product deactivated.");
+            CoffeeTheme.setStatusSuccess(statusLabel, "کاڵا ناچالاککرا.");
             loadProducts();
         } else {
-            CoffeeTheme.setStatusError(statusLabel, "Failed to deactivate product.");
+            CoffeeTheme.setStatusError(statusLabel, "هەڵەیەک لە ناچالاککردنی کاڵا ڕوویدا.");
         }
     }
 
     private void refreshData() {
         loadProducts();
         loadCategories();
-        CoffeeTheme.setStatusNeutral(statusLabel, "Product data refreshed.");
+        CoffeeTheme.setStatusNeutral(statusLabel, "داتاکان نوێکرانەوە.");
     }
 
     private void clearFields() {
@@ -439,7 +530,7 @@ public class ProductManagementView {
         newStockField.clear();
         productListView.getSelectionModel().clearSelection();
         categoryListView.getSelectionModel().clearSelection();
-        CoffeeTheme.setStatusNeutral(statusLabel, "Fields cleared.");
+        CoffeeTheme.setStatusNeutral(statusLabel, "خانەکان پاککرانەوە.");
     }
 
     private void clearAddProductFields() {
@@ -451,6 +542,6 @@ public class ProductManagementView {
     private void goBackToDashboard() {
         DashboardView dashboardView = new DashboardView(stage);
         stage.setScene(dashboardView.createScene());
-        stage.setTitle("Coffee POS - Dashboard");
+        stage.setTitle("داشبۆردی قاوەخانە");
     }
 }
