@@ -141,33 +141,33 @@ public class DashboardView {
 
     private GridPane buildMenuGrid(User user) {
         Button newSaleButton = createDashboardCard(
-                "☕ New Sale",
-                "Start a fresh customer order and manage the active cart."
+                "☕ فرۆشتنی نوێ",
+                "دەستپێکردنی داواکاری نوێ"
         );
 
         Button salesHistoryButton = createDashboardCard(
-                "🧾 Sales History",
-                "Review previous orders and inspect sold items."
+                "🧾 مێژووی فرۆشتن",
+                "بینینی داواکارییەکان"
         );
 
         Button reportsButton = createDashboardCard(
-                "📈 Reports",
-                "Open date-based reports and top-selling product insights."
+                "📈 ڕاپۆرت",
+                "ڕاپۆرتی فرۆشتن"
         );
 
         Button productsButton = createDashboardCard(
-                "📦 Product Management",
-                "Add products, update pricing, adjust stock, and manage status."
+                "📦 بەڕێوەبردنی کاڵا",
+                "زیادکردن و دەستکاری"
         );
 
         Button categoriesButton = createDashboardCard(
-                "🏷 Category Management",
-                "Create and review categories used for product organization."
+                "🏷 بەڕێوەبردنی پۆل",
+                "ڕێکخستنی کاڵاکان"
         );
 
         Button logoutButton = createDashboardCard(
-                "↩ Logout",
-                "Sign out safely and return to the login screen."
+                "↩ چوونەدەرەوە",
+                "کۆتایی سێشن"
         );
 
         newSaleButton.setOnAction(event -> {
