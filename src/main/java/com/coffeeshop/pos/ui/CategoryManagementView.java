@@ -13,7 +13,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -40,9 +42,11 @@ public class CategoryManagementView {
         User user = SessionManager.getCurrentUser();
 
         if (user == null) {
-            LoginView loginView = new LoginView(stage);
-            return loginView.createScene();
+            return new LoginView(stage).createScene();
         }
+
+        configureControls();
+        loadCategories();
 
         Label titleLabel = new Label("Category Management");
         titleLabel.setStyle("""
@@ -61,48 +65,87 @@ public class CategoryManagementView {
         VBox header = new VBox(6, titleLabel, userLabel);
         CoffeeTheme.styleHeaderBar(header);
 
-        categoryNameField.setPromptText("Category Name");
-        CoffeeTheme.styleTextField(categoryNameField);
-        CoffeeTheme.styleListView(categoryListView);
-        CoffeeTheme.styleStatusLabel(statusLabel);
-
-        loadCategories();
-
-        Button addCategoryButton = new Button("Add Category");
-        Button refreshButton = new Button("Refresh");
-        Button backButton = new Button("Back");
-
-        CoffeeTheme.stylePrimaryButton(addCategoryButton);
-        CoffeeTheme.styleSecondaryButton(refreshButton);
-        CoffeeTheme.styleGhostButton(backButton);
-
-        addCategoryButton.setOnAction(event -> addCategory());
-        refreshButton.setOnAction(event -> refreshCategories());
-        backButton.setOnAction(event -> goBackToDashboard());
-
-        Label categoriesLabel = new Label("Categories");
-        CoffeeTheme.styleSectionTitle(categoriesLabel);
-
-        VBox listCard = CoffeeTheme.createCard(14);
-        listCard.getChildren().addAll(categoriesLabel, categoryListView);
-
-        Label addLabel = new Label("Add New Category");
-        CoffeeTheme.styleSectionTitle(addLabel);
-
-        VBox formCard = CoffeeTheme.createCard(14);
-        formCard.getChildren().addAll(addLabel, categoryNameField, addCategoryButton, statusLabel);
-
-        HBox bottomButtons = new HBox(12, refreshButton, backButton);
-        bottomButtons.setAlignment(Pos.CENTER_LEFT);
-
-        VBox footerCard = CoffeeTheme.createCard(12);
-        footerCard.getChildren().add(bottomButtons);
+        VBox listCard = buildListCard();
+        VBox formCard = buildFormCard();
+        VBox footerCard = buildFooterCard();
 
         VBox root = new VBox(24, header, listCard, formCard, footerCard);
         root.setPadding(new Insets(26));
         CoffeeTheme.styleRoot(root);
+        VBox.setVgrow(listCard, Priority.ALWAYS);
 
-        return new Scene(root, 840, 700);
+        return new Scene(root, 920, 760);
+    }
+
+    private void configureControls() {
+        categoryNameField.setPromptText("Category Name");
+        categoryNameField.setMaxWidth(Double.MAX_VALUE);
+
+        CoffeeTheme.styleTextField(categoryNameField);
+        CoffeeTheme.styleListView(categoryListView);
+        CoffeeTheme.styleStatusLabel(statusLabel);
+
+        categoryListView.setPrefHeight(380);
+        categoryListView.setMinHeight(300);
+        categoryListView.setMaxWidth(Double.MAX_VALUE);
+
+        VBox.setVgrow(categoryListView, Priority.ALWAYS);
+    }
+
+    private VBox buildListCard() {
+        Label categoriesLabel = new Label("Categories");
+        CoffeeTheme.styleSectionTitle(categoriesLabel);
+
+        Label helperLabel = new Label("Existing categories available for products.");
+        CoffeeTheme.styleBodyLabel(helperLabel);
+
+        VBox listCard = CoffeeTheme.createCard(14);
+        listCard.getChildren().addAll(categoriesLabel, helperLabel, categoryListView);
+
+        VBox.setVgrow(categoryListView, Priority.ALWAYS);
+        return listCard;
+    }
+
+    private VBox buildFormCard() {
+        Label addLabel = new Label("Add New Category");
+        CoffeeTheme.styleSectionTitle(addLabel);
+
+        Button addCategoryButton = new Button("Add Category");
+        Button clearButton = new Button("Clear");
+        CoffeeTheme.stylePrimaryButton(addCategoryButton);
+        CoffeeTheme.styleGhostButton(clearButton);
+
+        addCategoryButton.setOnAction(event -> addCategory());
+        clearButton.setOnAction(event -> {
+            categoryNameField.clear();
+            CoffeeTheme.setStatusNeutral(statusLabel, "Cleared.");
+        });
+
+        HBox buttonRow = new HBox(12, addCategoryButton, clearButton);
+        buttonRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox formCard = CoffeeTheme.createCard(14);
+        formCard.getChildren().addAll(addLabel, categoryNameField, buttonRow, statusLabel);
+
+        return formCard;
+    }
+
+    private VBox buildFooterCard() {
+        Button refreshButton = new Button("Refresh");
+        Button backButton = new Button("Back");
+
+        CoffeeTheme.styleSecondaryButton(refreshButton);
+        CoffeeTheme.styleGhostButton(backButton);
+
+        refreshButton.setOnAction(event -> refreshCategories());
+        backButton.setOnAction(event -> goBackToDashboard());
+
+        HBox buttonRow = new HBox(12, refreshButton, backButton);
+        buttonRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox footerCard = CoffeeTheme.createCard(12);
+        footerCard.getChildren().add(buttonRow);
+        return footerCard;
     }
 
     private void loadCategories() {
