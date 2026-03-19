@@ -101,7 +101,7 @@ public class LoginView {
                 -fx-effect: dropshadow(gaussian, rgba(70,40,20,0.08), 16, 0.12, 0, 4);
                 """);
 
-        Label quoteTitle = new Label("✨ ئامادەی کارکردنی ڕۆژانە");
+        Label quoteTitle = new Label(" ئامادەی کارکردنی ڕۆژانە");
         quoteTitle.setStyle("""
                 -fx-text-fill: #5B3F2E;
                 -fx-font-size: 16px;
