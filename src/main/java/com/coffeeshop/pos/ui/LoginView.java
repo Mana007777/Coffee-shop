@@ -24,21 +24,21 @@ public class LoginView {
     }
 
     public Scene createScene() {
-        Label logoLabel = new Label("☕ Coffee POS");
+        Label logoLabel = new Label(" قاوەخانەی کوردی");
         CoffeeTheme.styleTitle(logoLabel);
 
-        Label welcomeLabel = new Label("Brew better service, one order at a time");
+        Label welcomeLabel = new Label("تام و بۆن لای خۆمانە");
         CoffeeTheme.styleSubtitle(welcomeLabel);
 
         TextField usernameField = new TextField();
-        usernameField.setPromptText("Username");
+        usernameField.setPromptText("ناو");
         CoffeeTheme.styleTextField(usernameField);
 
         PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("Password");
+        passwordField.setPromptText("ووشەی نهێنی");
         CoffeeTheme.styleTextField(passwordField);
 
-        Button loginButton = new Button("Login");
+        Button loginButton = new Button("چوونەژورەوە");
         CoffeeTheme.stylePrimaryButton(loginButton);
         loginButton.setMaxWidth(Double.MAX_VALUE);
 
@@ -50,7 +50,7 @@ public class LoginView {
             String password = passwordField.getText();
 
             if (username.isEmpty() || password.isEmpty()) {
-                CoffeeTheme.setStatusError(statusLabel, "Please enter username and password.");
+                CoffeeTheme.setStatusError(statusLabel, "تکایە ناو و ووشە نهێنیەکەت بنوسە");
                 return;
             }
 
@@ -63,9 +63,9 @@ public class LoginView {
                 Scene dashboardScene = dashboardView.createScene();
 
                 stage.setScene(dashboardScene);
-                stage.setTitle("Coffee POS - Dashboard");
+                stage.setTitle("داشبۆردی قاوەخانە");
             } else {
-                CoffeeTheme.setStatusError(statusLabel, "Invalid username or password.");
+                CoffeeTheme.setStatusError(statusLabel, "ووشەی نهێنی یاخود ناو هەڵەیە");
             }
         });
 
@@ -85,7 +85,7 @@ public class LoginView {
         leftHero.setAlignment(Pos.CENTER_LEFT);
         leftHero.setPadding(new Insets(10));
 
-        Label heroTitle = new Label("Modern coffee shop operations");
+        Label heroTitle = new Label("تام و بۆنی قاوەی ڕەسەن");
         heroTitle.setStyle("""
                 -fx-text-fill: #2E211B;
                 -fx-font-size: 34px;
@@ -93,7 +93,7 @@ public class LoginView {
                 """);
 
         Label heroText = new Label(
-                "Manage sales, products, reports, and categories in one polished POS experience."
+                "هەر چاکە چاکە"
         );
         heroText.setWrapText(true);
         heroText.setStyle("""
@@ -102,9 +102,9 @@ public class LoginView {
                 -fx-font-weight: 600;
                 """);
 
-        Label chip1 = CoffeeTheme.createMetricLabel("Fast Checkout", "Instant cart flow");
-        Label chip2 = CoffeeTheme.createMetricLabel("Inventory", "Live stock updates");
-        Label chip3 = CoffeeTheme.createMetricLabel("Reports", "Daily insights");
+        Label chip1 = CoffeeTheme.createMetricLabel("کاپوچینۆ", "خۆشی");
+        Label chip2 = CoffeeTheme.createMetricLabel("لاتێ", "بەرامی");
+        Label chip3 = CoffeeTheme.createMetricLabel("قاوەی سەوز", "ناوازەی");
 
         HBox chips = new HBox(12, chip1, chip2, chip3);
         chips.setAlignment(Pos.CENTER_LEFT);
