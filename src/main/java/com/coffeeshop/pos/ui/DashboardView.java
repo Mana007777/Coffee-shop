@@ -122,21 +122,19 @@ public class DashboardView {
     }
 
     private HBox buildStatsRow(User user) {
-        VBox stat1 = createStatCard("Session User", user.getUsername(), "Current signed-in account");
-        VBox stat2 = createStatCard("Role", user.getRole(), "Access level for this session");
+
+        VBox stat1 = createStatCard("بەکارهێنەر", user.getUsername(), "ئێستا تۆ چوویتە ژوورەوە");
+        VBox stat2 = createStatCard("ڕۆڵ", user.getRole(), "دەسەڵاتەکانت");
         VBox stat3 = createStatCard(
-                "Available Modules",
-                SessionManager.isAdmin() ? "6 modules" : "3 modules",
+                "بەشەکان",
+                SessionManager.isAdmin() ? "٦ بەش" : "٣ بەش",
                 SessionManager.isAdmin()
-                        ? "Sales, history, reports, products, categories, logout"
-                        : "Sales, history, logout"
+                        ? "فرۆشتن، ڕاپۆرت، کاڵا..."
+                        : "فرۆشتن و مێژوو"
         );
 
         HBox row = new HBox(18, stat1, stat2, stat3);
         row.setAlignment(Pos.CENTER);
-        HBox.setHgrow(stat1, Priority.ALWAYS);
-        HBox.setHgrow(stat2, Priority.ALWAYS);
-        HBox.setHgrow(stat3, Priority.ALWAYS);
 
         return row;
     }
