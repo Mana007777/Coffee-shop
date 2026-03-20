@@ -8,6 +8,7 @@ import com.coffeeshop.pos.service.OrderService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -40,36 +41,175 @@ public class SalesHistoryView {
         User user = SessionManager.getCurrentUser();
 
         if (user == null) {
-            LoginView loginView = new LoginView(stage);
-            return loginView.createScene();
+            return new LoginView(stage).createScene();
         }
 
+        configureControls();
         loadOrders();
 
-        Label titleLabel = new Label("Sales History");
+        VBox header = buildHeader(user);
+        HBox overviewRow = buildOverviewRow();
+        VBox ordersPanel = buildOrdersPanel();
+        VBox itemsPanel = buildItemsPanel();
+        VBox footer = buildFooter();
+
+        HBox centerPanel = new HBox(24, ordersPanel, itemsPanel);
+        centerPanel.setAlignment(Pos.TOP_CENTER);
+        HBox.setHgrow(ordersPanel, Priority.ALWAYS);
+        HBox.setHgrow(itemsPanel, Priority.ALWAYS);
+
+        VBox root = new VBox(24, header, overviewRow, centerPanel, footer);
+        root.setPadding(new Insets(26));
+        CoffeeTheme.styleRoot(root);
+        VBox.setVgrow(centerPanel, Priority.ALWAYS);
+
+        return new Scene(root, 1240, 820);
+    }
+
+    private void configureControls() {
+        CoffeeTheme.styleListView(ordersListView);
+        CoffeeTheme.styleListView(orderItemsListView);
+        CoffeeTheme.styleStatusLabel(statusLabel);
+
+        ordersListView.setPrefHeight(560);
+        ordersListView.setMinHeight(500);
+        ordersListView.setMaxWidth(Double.MAX_VALUE);
+
+        orderItemsListView.setPrefHeight(560);
+        orderItemsListView.setMinHeight(500);
+        orderItemsListView.setMaxWidth(Double.MAX_VALUE);
+
+        statusLabel.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+
+        VBox.setVgrow(ordersListView, Priority.ALWAYS);
+        VBox.setVgrow(orderItemsListView, Priority.ALWAYS);
+    }
+
+    private VBox buildHeader(User user) {
+        Label titleLabel = new Label("مێژووی فرۆشتن");
         titleLabel.setStyle("""
                 -fx-text-fill: white;
-                -fx-font-size: 28px;
+                -fx-font-size: 30px;
                 -fx-font-weight: bold;
                 """);
 
-        Label userLabel = new Label("User: " + user.getUsername());
+        Label userLabel = new Label("بەکارهێنەر: " + user.getUsername());
         userLabel.setStyle("""
                 -fx-text-fill: rgba(255,255,255,0.92);
                 -fx-font-size: 14px;
                 -fx-font-weight: 600;
                 """);
 
-        VBox header = new VBox(6, titleLabel, userLabel);
+        Label helperLabel = new Label("بینینی داواکارییەکان و وردەکاریی بابەتەکانی هەر فرۆشتنێک");
+        helperLabel.setWrapText(true);
+        helperLabel.setStyle("""
+                -fx-text-fill: rgba(255,255,255,0.86);
+                -fx-font-size: 13px;
+                -fx-font-weight: 500;
+                """);
+
+        VBox header = new VBox(8, titleLabel, userLabel, helperLabel);
         CoffeeTheme.styleHeaderBar(header);
+        return header;
+    }
 
-        CoffeeTheme.styleListView(ordersListView);
-        CoffeeTheme.styleListView(orderItemsListView);
-        CoffeeTheme.styleStatusLabel(statusLabel);
+    private HBox buildOverviewRow() {
+        VBox stat1 = createInfoCard("داواکارییەکان", "بینینی هەموو فرۆشتنەکان", "لە لیستی چەپدا دەر دەکەون");
+        VBox stat2 = createInfoCard("بابەتەکان", "وردەکاریی هەر داواکارییەک", "دوای هەڵبژاردنی داواکاری پیشان دەدرێن");
+        VBox stat3 = createInfoCard("خزمەتگوزاری", "گەڕان و نوێکردنەوە", "زانیارییەکان بە خێرایی نوێ دەکرێنەوە");
 
-        Button viewDetailsButton = new Button("View Order Details");
-        Button refreshButton = new Button("Refresh");
-        Button backButton = new Button("Back");
+        HBox row = new HBox(18, stat1, stat2, stat3);
+        row.setAlignment(Pos.CENTER);
+        HBox.setHgrow(stat1, Priority.ALWAYS);
+        HBox.setHgrow(stat2, Priority.ALWAYS);
+        HBox.setHgrow(stat3, Priority.ALWAYS);
+        return row;
+    }
+
+    private VBox createInfoCard(String title, String value, String subtitle) {
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("""
+                -fx-text-fill: #7A675C;
+                -fx-font-size: 12px;
+                -fx-font-weight: 700;
+                """);
+
+        Label valueLabel = new Label(value);
+        valueLabel.setWrapText(true);
+        valueLabel.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        valueLabel.setStyle("""
+                -fx-text-fill: #2E211B;
+                -fx-font-size: 19px;
+                -fx-font-weight: 800;
+                """);
+
+        Label subtitleLabel = new Label(subtitle);
+        subtitleLabel.setWrapText(true);
+        subtitleLabel.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        subtitleLabel.setStyle("""
+                -fx-text-fill: #8B776C;
+                -fx-font-size: 12px;
+                -fx-font-weight: 600;
+                """);
+
+        VBox card = new VBox(8, titleLabel, valueLabel, subtitleLabel);
+        card.setPadding(new Insets(18));
+        card.setPrefHeight(120);
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.setStyle("""
+                -fx-background-color: #FFFDF9;
+                -fx-background-radius: 20;
+                -fx-border-color: #E6D6C8;
+                -fx-border-radius: 20;
+                -fx-border-width: 1;
+                -fx-effect: dropshadow(gaussian, rgba(70,40,20,0.08), 16, 0.15, 0, 5);
+                """);
+
+        return card;
+    }
+
+    private VBox buildOrdersPanel() {
+        Label ordersLabel = new Label("داواکارییەکان");
+        CoffeeTheme.styleSectionTitle(ordersLabel);
+
+        Label helperLabel = new Label("داواکارییەک هەڵبژێرە بۆ بینینی وردەکارییەکانی.");
+        helperLabel.setWrapText(true);
+        helperLabel.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        CoffeeTheme.styleBodyLabel(helperLabel);
+
+        VBox panel = CoffeeTheme.createCard(14);
+        panel.setPrefWidth(580);
+        panel.setMinWidth(540);
+
+        VBox.setVgrow(ordersListView, Priority.ALWAYS);
+        panel.getChildren().addAll(ordersLabel, helperLabel, ordersListView);
+
+        return panel;
+    }
+
+    private VBox buildItemsPanel() {
+        Label itemsLabel = new Label("بابەتەکانی داواکاری");
+        CoffeeTheme.styleSectionTitle(itemsLabel);
+
+        Label helperLabel = new Label("دوای هەڵبژاردنی داواکاری، وردەکاریی بابەتەکان لێرە دەر دەکەون.");
+        helperLabel.setWrapText(true);
+        helperLabel.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        CoffeeTheme.styleBodyLabel(helperLabel);
+
+        VBox panel = CoffeeTheme.createCard(14);
+        panel.setPrefWidth(580);
+        panel.setMinWidth(540);
+
+        VBox.setVgrow(orderItemsListView, Priority.ALWAYS);
+        panel.getChildren().addAll(itemsLabel, helperLabel, orderItemsListView);
+
+        return panel;
+    }
+
+    private VBox buildFooter() {
+        Button viewDetailsButton = new Button("پیشاندانی وردەکاری");
+        Button refreshButton = new Button("نوێکردنەوە");
+        Button backButton = new Button("گەڕانەوە");
 
         CoffeeTheme.stylePrimaryButton(viewDetailsButton);
         CoffeeTheme.styleSecondaryButton(refreshButton);
@@ -79,38 +219,19 @@ public class SalesHistoryView {
         refreshButton.setOnAction(event -> {
             loadOrders();
             orderItemsListView.getItems().clear();
-            CoffeeTheme.setStatusNeutral(statusLabel, "Sales history refreshed.");
+            CoffeeTheme.setStatusNeutral(statusLabel, "مێژووی فرۆشتن نوێکرایەوە.");
         });
         backButton.setOnAction(event -> goBackToDashboard());
 
-        Label ordersLabel = new Label("Orders");
-        CoffeeTheme.styleSectionTitle(ordersLabel);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        VBox leftPanel = CoffeeTheme.createCard(14);
-        leftPanel.setPrefWidth(500);
-        leftPanel.getChildren().addAll(ordersLabel, ordersListView);
-
-        Label itemsLabel = new Label("Order Items");
-        CoffeeTheme.styleSectionTitle(itemsLabel);
-
-        VBox rightPanel = CoffeeTheme.createCard(14);
-        rightPanel.setPrefWidth(500);
-        rightPanel.getChildren().addAll(itemsLabel, orderItemsListView);
-
-        HBox centerPanel = new HBox(24, leftPanel, rightPanel);
-        centerPanel.setAlignment(Pos.CENTER);
-
-        HBox controls = new HBox(12, viewDetailsButton, refreshButton, backButton);
+        HBox controls = new HBox(12, viewDetailsButton, refreshButton, spacer, backButton);
         controls.setAlignment(Pos.CENTER_LEFT);
 
         VBox footer = CoffeeTheme.createCard(12);
         footer.getChildren().addAll(controls, statusLabel);
-
-        VBox root = new VBox(24, header, centerPanel, footer);
-        root.setPadding(new Insets(26));
-        CoffeeTheme.styleRoot(root);
-
-        return new Scene(root, 1120, 760);
+        return footer;
     }
 
     private void loadOrders() {
@@ -123,7 +244,7 @@ public class SalesHistoryView {
         Order selectedOrder = ordersListView.getSelectionModel().getSelectedItem();
 
         if (selectedOrder == null) {
-            CoffeeTheme.setStatusError(statusLabel, "Please select an order.");
+            CoffeeTheme.setStatusError(statusLabel, "تکایە داواکارییەک هەڵبژێرە.");
             return;
         }
 
@@ -132,15 +253,15 @@ public class SalesHistoryView {
         orderItemsListView.setItems(orderItemList);
 
         if (items.isEmpty()) {
-            CoffeeTheme.setStatusError(statusLabel, "No items found for order #" + selectedOrder.getId());
+            CoffeeTheme.setStatusError(statusLabel, "هیچ بابەتێک بۆ داواکاری ژمارە " + selectedOrder.getId() + " نەدۆزرایەوە.");
         } else {
-            CoffeeTheme.setStatusSuccess(statusLabel, "Loaded details for order #" + selectedOrder.getId());
+            CoffeeTheme.setStatusSuccess(statusLabel, "وردەکاریی داواکاری ژمارە " + selectedOrder.getId() + " بارکرا.");
         }
     }
 
     private void goBackToDashboard() {
         DashboardView dashboardView = new DashboardView(stage);
         stage.setScene(dashboardView.createScene());
-        stage.setTitle("Coffee POS - Dashboard");
+        stage.setTitle("داشبۆردی قاوەخانە");
     }
 }
