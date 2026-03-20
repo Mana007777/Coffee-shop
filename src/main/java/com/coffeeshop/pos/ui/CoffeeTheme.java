@@ -28,9 +28,9 @@ public final class CoffeeTheme {
 
     public static void styleRoot(Region root) {
         root.setStyle("""
-                -fx-background-color: linear-gradient(to bottom right, #F8F3EE, #EFE4D8);
-                -fx-font-family: "Segoe UI", "Arial", sans-serif;
-                """);
+            -fx-background-color: linear-gradient(to bottom right, #F8F3EE, #EFE4D8);
+            -fx-font-family: "Noto Sans Arabic", "Segoe UI", "Arial";
+            """);
     }
 
     public static VBox createCard(double spacing) {
