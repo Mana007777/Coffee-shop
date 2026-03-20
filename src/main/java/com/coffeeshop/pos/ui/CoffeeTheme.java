@@ -63,10 +63,10 @@ public final class CoffeeTheme {
 
     public static void styleTitle(Label label) {
         label.setStyle("""
-                -fx-text-fill: #2E211B;
-                -fx-font-size: 28px;
-                -fx-font-weight: bold;
-                """);
+            -fx-text-fill: #2E211B;
+            -fx-font-size: 24px;
+            -fx-font-weight: bold;
+            """);
     }
 
     public static void styleSubtitle(Label label) {
@@ -79,18 +79,18 @@ public final class CoffeeTheme {
 
     public static void styleSectionTitle(Label label) {
         label.setStyle("""
-                -fx-text-fill: #4B3224;
-                -fx-font-size: 18px;
-                -fx-font-weight: bold;
-                """);
+            -fx-text-fill: #4B3224;
+            -fx-font-size: 16px;
+            -fx-font-weight: bold;
+            """);
     }
 
     public static void styleBodyLabel(Label label) {
         label.setStyle("""
-                -fx-text-fill: #5A463B;
-                -fx-font-size: 13px;
-                -fx-font-weight: 600;
-                """);
+            -fx-text-fill: #5A463B;
+            -fx-font-size: 12px;
+            -fx-font-weight: 600;
+            """);
     }
 
     public static void styleStatusLabel(Label label) {
